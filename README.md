@@ -1,22 +1,27 @@
-A efficient transfer to the cloud
----------------------------------
+An efficient transfer to the cloud
+----------------------------------
 
 The main goal of this tool is to provide efficient and reliable upload/download
-for large (>5GB) files to and from the cloud.
+for large ( >5GB) files to and from the cloud.
 
-Wanna provides high level abstractions to achieve this goal.
-It handles several things for the user:
+Wanna handles several things for the user:
 
-  * Handy command line tool: wanna
   * Uploading/downloading a file in parallel
-  * Simple progress bar
   * Retries, when possible
-  * Server side encryption in transfer and on rest
+  * Encryption in transit and at rest
   * Control checksum to verify data integrity
 
-and tries to follow multi-cloud strategy.
+has a reasonable set of defaults:
 
-Currently only `aws s3` is supported. Pull requests with adding more data centers are welcome!
+  * Multipart threshold size (small/large file switch)
+  * Max parallel downloads
+  * Socket timeouts
+
+and includes handy command line tool: `wanna` with simple progress bar.
+
+Wanna tries to follow multi-cloud strategy.
+Currently only `aws s3` is supported but pull requests with adding more data centers are welcome.
+Nice to have: Azure, Google Cloud, IBM Softlayer
 
 Installation
 ------------
@@ -41,13 +46,14 @@ aws_secret_access_key = your_secret_key
 
 Usage
 -----
+from command line:
 ```cmd
 >> wanna upload big_file.tar.gz --encrypt --progress --checksum
 >> wanna download big_file.tar.gz --decrypt --progress
 >> wanna delete big_file.tar.gz
 >> wanna ls
 ```
-or from python
+or from python:
 
 ```python
 from wanna import Transfer
