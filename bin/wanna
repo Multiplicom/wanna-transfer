@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+"""Wanna transfer.
+
+
+Usage:
+  wanna upload <filepath>  [--encrypt] [--progress] [--checksum] [--datacenter=<aws>]
+  wanna download <filepath> [--decrypt] [--progress] [--datacenter=<aws>]
+  wanna delete <filename> [--datacenter=<aws>]
+  wanna ls [--datacenter=<aws>]
+  wanna (-h | --help)
+  wanna --version
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  --progress    Show progress bar.
+  --encrypt     Encrypt on rest.
+  --decrypt     Decrypt on transit.
+  --datacenter=<name>  Cloud provider [default: aws]
+"""
+from docopt import docopt
+from wanna import __version__ as version
+
+import sys
+
+
+def _handle(args):
+    if args['<filepath>'] is not None:
+        path = args['<filepath>']
+        use_encryption = args['--encrypt'] or args['--decrypt']
+        progress = args['--progress']
+        if args['upload']:
+            add_checksum = args['--checksum']
+        vendor = args['--datacenter']
+    args = locals()
+    args.pop('args')
+    return args
+
+
+def handle_upload(args):
+    from wanna import upload_file
+    kwargs = _handle(args)
+    upload_file(**kwargs)
+
+
+def handle_ls(args):
+    from wanna import list_files
+    list_files(args['--datacenter'])
+
+
+def handle_download(args):
+    from wanna import download_file
+    kwargs = _handle(args)
+    download_file(**kwargs)
+
+
+def handle_delete(args):
+    from wanna import delete_file
+    raise NotImplementedError()
+
+
+def handle_cry():
+    import random
+    from pygments.console import codes
+    code = 'Hahahah you wanna cry...'
+    print(''.join(random.choice(codes.values()) + x + codes['reset'] for x in code))
+    sys.exit()
+
+
+if __name__ == '__main__':
+    if 'cry' in sys.argv:
+        handle_cry()
+    args = docopt(__doc__, version=version)
+
+    if args['upload'] is True:
+        handle_upload(args)
+
+    if args['download'] is True:
+        handle_download(args)
+
+    if args['ls'] is True:
+        handle_ls(args)
