@@ -83,7 +83,7 @@ def handle_cry():
     sys.exit()
 
 
-if __name__ == '__main__':
+def main():
     if 'cry' in sys.argv:
         handle_cry()
 
@@ -105,3 +105,6 @@ if __name__ == '__main__':
 
     if args['ls'] is True:
         handle_ls(args)
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,6 @@
 An efficient transfer to the cloud
 ----------------------------------
+[![Build Status](https://travis-ci.org/piotrpawlaczek/wanna-transfer.svg?branch=master)](https://travis-ci.org/piotrpawlaczek/wanna-transfer)
 
 The main goal of this tool is to provide efficient and reliable upload/download
 for large ( >5GB) files to and from the cloud.

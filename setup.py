@@ -1,3 +1,21 @@
+"""
+Wanna-transfer
+--------------
+Wanna-transfer is a python based tool to
+efficient upload and download large files to and from the cloud.
+
+It is easy to setup
+```````````````````
+And run it:
+.. code:: bash
+    $ pip install wanna-transfer
+    $ wanna -h
+
+Links
+`````
+* `development
+  <https://github.com/piotrpawlaczek/wanna-transfer>`_
+"""
 import re
 import codecs
 import os.path
@@ -30,12 +48,15 @@ setup_options = dict(
     name='wanna-transfer',
     version=find_version("wanna", "__init__.py"),
     description='High level transfer to the cloud',
-    long_description=open('README.md').read(),
+    long_description=__doc__,
     author='Piotr Pawlaczek',
     url='http://github.com/piotrpawlaczek/wanna',
-    scripts=['bin/wanna', ],
+    entry_points={
+        'console_scripts': ['wanna = wanna.entry_points.wannacli:main']
+    },
     packages=find_packages(exclude=['tests*']),
     install_requires=requires,
+    zip_safe=False,
     license="BSD",
     classifiers=(
         'Development Status :: 5 - Production/Stable',
