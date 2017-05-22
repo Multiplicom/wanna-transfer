@@ -34,13 +34,11 @@ class _AWS(object):
         self._bucket = config.BUCKET
         self._prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
-        LOG.debug('Creating aws connection.')
         self.client = boto3.client(
             self.service,
             aws_access_key_id=config.VENDOR.API_KEY,
             aws_secret_access_key=config.VENDOR.API_SECRET,
-            config=BotoConfig(signature_version=self.signature_version)
-        )
+            config=BotoConfig(signature_version=self.signature_version))
         self._transfer = S3Transfer
         self._checksum = None
         self.ignore_prefix = ignore_prefix
@@ -53,10 +51,10 @@ class _AWS(object):
         """Extra parameters"""
         args = {}
         if self._encrypt:
-            LOG.info('Using encryption: {}'.format(self.config.ENCRYPTION_ALGORITHM))
+            LOG.info('using encryption: {}'.format(self.config.ENCRYPTION_ALGORITHM))
             args.update({
+                'SSECustomerAlgorithm': self.config.ENCRYPTION_ALGORITHM,
                 'SSECustomerKey': self.config.ENCRYPTION_KEY,
-                'SSECustomerAlgorithm': self.config.ENCRYPTION_ALGORITHM
             })
         return args
 
@@ -74,12 +72,12 @@ class _AWS(object):
         return self._checksum
 
     def upload_checksum(self, path):
-        """Upload md5sum for the given file"""
-        LOG.info('Uploading checksum')
+        """Upload control sum for the given file"""
+        LOG.info('uploading checksum')
         key = self.get_obj_key(path, md5=True) if not self.ignore_prefix else path
         checksum = self.get_checksum(path)
         response = self.client.put_object(Bucket=self._bucket, Key=key, Body=checksum)
-        LOG.info('Checksum (%s): %s', (self.hash_checksum, checksum))
+        LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
         return response
 
     def upload_file(self, path, progress=False):
@@ -92,13 +90,12 @@ class _AWS(object):
             with self._transfer(self.client) as transfer:
                 response = transfer.upload_file(
                     path, self._bucket, key, extra_args=extra_args, callback=progress_callback)
+        print()
         return response
 
     def get_object_size(self, path):
         """Get object size"""
-        response = self.client.head_object(Bucket=self._bucket,
-                                           Key=self.get_obj_key(path),
-                                           **self.get_extra_args())
+        response = self.client.head_object(Bucket=self._bucket, Key=self.get_obj_key(path), **self.get_extra_args())
         return response['ContentLength']
 
     def check_if_key_exists(self, key):
@@ -118,6 +115,7 @@ class _AWS(object):
             with self._transfer(self.client) as transfer:
                 response = transfer.download_file(
                     self._bucket, key, path, extra_args=extra_args, callback=progress_callback)
+        print()
         return response
 
     def list_files(self, progress=False):
@@ -129,3 +127,9 @@ class _AWS(object):
                     print('{}\t {}\t {}'.format(el['LastModified'].isoformat(), el['Size'], el['Key']))
             else:
                 print('no files')
+
+    def delete_file(self, path):
+        """Delete file object"""
+        key = self.get_obj_key(path)
+        with ignore_ctrl_c():
+            return self.client.delete_object(Bucket=self._bucket, Key=key)
