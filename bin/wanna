@@ -3,9 +3,9 @@
 
 
 Usage:
-  wanna upload <filepath>  [--encrypt] [--progress] [--checksum] [--datacenter=<aws>]
-  wanna download <filepath> [--decrypt] [--progress] [--datacenter=<aws>]
-  wanna delete <filename> [--datacenter=<aws>]
+  wanna upload <filepath>  [--encrypt] [--progress] [--checksum] [--datacenter=<aws>] [--verbose]
+  wanna download <filepath> [--decrypt] [--progress] [--checksum] [--datacenter=<aws>] [--verbose]
+  wanna delete <filename> [--verbose] [--datacenter=<aws>]
   wanna ls [--datacenter=<aws>]
   wanna (-h | --help)
   wanna --version
@@ -14,14 +14,19 @@ Options:
   -h --help     Show this screen.
   --version     Show version.
   --progress    Show progress bar.
-  --encrypt     Encrypt on rest.
-  --decrypt     Decrypt on transit.
+  --encrypt     Encrypt at rest.
+  --decrypt     Decrypt in transit.
+  --verbose     More text on stderr.
   --datacenter=<name>  Cloud provider [default: aws]
 """
 from docopt import docopt
 from wanna import __version__ as version
 
 import sys
+import logging
+
+
+LOG = logging.getLogger('wanna')
 
 
 def _handle(args):
@@ -29,17 +34,19 @@ def _handle(args):
         path = args['<filepath>']
         use_encryption = args['--encrypt'] or args['--decrypt']
         progress = args['--progress']
-        if args['upload']:
+        if args['upload'] or args['download']:
             add_checksum = args['--checksum']
         vendor = args['--datacenter']
     args = locals()
     args.pop('args')
+    LOG.debug(args)
     return args
 
 
 def handle_upload(args):
     from wanna import upload_file
     kwargs = _handle(args)
+    LOG.info('Uploading {path}...'.format(**kwargs))
     upload_file(**kwargs)
 
 
@@ -51,11 +58,14 @@ def handle_ls(args):
 def handle_download(args):
     from wanna import download_file
     kwargs = _handle(args)
+    LOG.info('Getting {path}...'.format(**kwargs))
     download_file(**kwargs)
 
 
 def handle_delete(args):
     from wanna import delete_file
+    kwargs = _handle(args)
+    LOG.warning('Deleting {path}...'.format(**kwargs))
     raise NotImplementedError()
 
 
@@ -70,7 +80,10 @@ def handle_cry():
 if __name__ == '__main__':
     if 'cry' in sys.argv:
         handle_cry()
+
     args = docopt(__doc__, version=version)
+    if args['--verbose'] is True:
+        logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
     if args['upload'] is True:
         handle_upload(args)

@@ -39,9 +39,10 @@ def ignore_ctrl_c():
 
 
 class ProgressPercentage(object):
-    def __init__(self, filename):
+    """A simple progress bar"""
+    def __init__(self, filename, size=None):
         self._filename = filename
-        self._size = float(os.path.getsize(filename))
+        self._size = size or float(os.path.getsize(filename))
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
