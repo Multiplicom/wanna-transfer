@@ -6,10 +6,13 @@ efficient upload and download large files to and from the cloud.
 
 It is easy to setup
 ```````````````````
+
 And run it:
+
 .. code:: bash
-$ pip install wanna-transfer
-$ wanna -h
+
+   $ pip install wanna-transfer
+   $ wanna -h
 
 Links
 `````
@@ -51,7 +54,7 @@ setup_options = dict(
     long_description=__doc__,
     author='Piotr Pawlaczek',
     author_email='info@pawlaczek.pl',
-    url='http://github.com/piotrpawlaczek/wanna',
+    url='http://github.com/piotrpawlaczek/wanna-transfer',
     entry_points={
         'console_scripts': ['wanna = wanna.entry_points.wannacli:main']
     },
