@@ -47,17 +47,38 @@ aws_secret_access_key = your_secret_key
 
 Usage
 -----
-from command line:
-```cmd
->> wanna upload big_file.tar.gz --encrypt --progress --checksum
->> wanna download big_file.tar.gz --decrypt --progress
->> wanna delete big_file.tar.gz
->> wanna ls
+from the command line:
+```
+>> wanna -h   
+                                                                                                                            
+Wanna transfer.
+
+Usage:
+  wanna upload [--no-encrypt] [--no-progress] [-v | -vv]
+               [--checksum] [--datacenter=<aws>] [--ignore--prefix] PATH
+  wanna download [--no-decrypt] [--no-progress] [-v | -vv]
+                 [--checksum] [--datacenter=<aws>] PATH
+  wanna delete [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] PATH
+  wanna search [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] TERM
+  wanna rename [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] OLD NEW
+  wanna ls [--datacenter=<aws>] [--ignore-prefix] [-v | -vv]
+  wanna (-h | --help)
+  wanna --version
+
+Options:
+  -h --help      Show this message and exit.
+  -v --verbose   Show more text.
+  --version      Show version and exit.
+  --no-progress  Do not show progress bar.
+  --no-encrypt   Do not encrypt at rest.
+  --no-decrypt   Do not decrypt in transit.
+  --ignore-prefix  Ignore all prefixes
+  --datacenter=<name>  Cloud provider [default: aws]
 ```
 or from python:
 
 ```python
-from wanna import Transfer
+from wanna import upload_file
 
-Transfer.upload_file(...)
+upload_file(vendor='aws', path)
 ```
