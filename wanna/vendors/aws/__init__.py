@@ -112,25 +112,30 @@ class _AWS(object):
         return response
 
     def search(self, term):
+        """Fuzzy search for the object(s) using given term"""
         bucket = self.resource.Bucket(self._bucket)
         for obj in fuzzyfinder(term, (obj.key for obj in bucket.objects.all())):
             yield obj
 
     def rename_object(self, old_prefix, new_prefix):
         """Rename object"""
-        LOG.warning('ignoring all prefixes')
+        LOG.warning(':ignoring all prefixes')
         copy_source = {
             'Bucket': self._bucket,
             'Key': old_prefix
         }
         extra = self._get_extra_args()
-        extra.update(dict(
-            CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
-            CopySourceSSECustomerKey=self.config.ENCRYPTION_KEY))
+        if self._encrypt:
+            extra.update(dict(
+                CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
+                CopySourceSSECustomerKey=self.config.ENCRYPTION_KEY))
 
-        self.client.copy(
-            copy_source, self._bucket, new_prefix, ExtraArgs=extra
-        )
+        with ignore_ctrl_c():
+            LOG.info(':renaming')
+            self.client.copy(
+                copy_source, self._bucket, new_prefix, ExtraArgs=extra
+            )
+            self.delete_file(old_prefix)
 
     def get_object_size(self, path):
         """Get object size"""
