@@ -7,6 +7,7 @@ import configparser
 
 
 class Config(object):
+    """Shared settings"""
     PARTNER_NAME = 'partner'
     ENCRYPTION_ALGORITHM = 'AES256'
     UPLOAD_PREFIX = 'in'
@@ -24,7 +25,7 @@ class Config(object):
 
 
 class AWS(object):
-
+    """Aws specific settings"""
     def __init__(self, cfg):
         self.API_KEY = cfg.get('aws', 'aws_access_key_id', fallback='missing')
         self.API_SECRET = cfg.get('aws', 'aws_secret_access_key', fallback='missing')
