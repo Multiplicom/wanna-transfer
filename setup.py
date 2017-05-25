@@ -8,8 +8,8 @@ It is easy to setup
 ```````````````````
 And run it:
 .. code:: bash
-    $ pip install wanna-transfer
-    $ wanna -h
+$ pip install wanna-transfer
+$ wanna -h
 
 Links
 `````
@@ -50,6 +50,7 @@ setup_options = dict(
     description='High level transfer to the cloud',
     long_description=__doc__,
     author='Piotr Pawlaczek',
+    author_email='info@pawlaczek.pl',
     url='http://github.com/piotrpawlaczek/wanna',
     entry_points={
         'console_scripts': ['wanna = wanna.entry_points.wannacli:main']

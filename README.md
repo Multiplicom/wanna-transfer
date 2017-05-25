@@ -1,6 +1,7 @@
 An efficient transfer to the cloud
 ----------------------------------
 [![Build Status](https://travis-ci.org/piotrpawlaczek/wanna-transfer.svg?branch=master)](https://travis-ci.org/piotrpawlaczek/wanna-transfer)
+[![PyPI version](https://badge.fury.io/py/wanna-transfer.svg)](https://badge.fury.io/py/wanna-transfer)
 
 The main goal of this tool is to provide efficient and reliable upload/download
 for large ( >5GB) files to and from the cloud.
@@ -27,7 +28,7 @@ Nice to have: Azure, Google Cloud, IBM Softlayer
 Installation
 ------------
 ```cmd
->> python setup.py install
+>> pip install wanna-transfer
 ```
 Create a configuration file under ~/.wanna/credentials
 
@@ -49,8 +50,8 @@ Usage
 -----
 from the command line:
 ```
->> wanna -h   
-                                                                                                                            
+>> wanna -h
+
 Wanna transfer.
 
 Usage:
