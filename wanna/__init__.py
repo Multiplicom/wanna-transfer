@@ -5,7 +5,7 @@ from wanna.misc import delete_file
 from wanna.vendors.aws import _AWS
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 ALIASES = {
     's3': _AWS,
