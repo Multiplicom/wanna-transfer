@@ -51,18 +51,17 @@ Usage
 from the command line:
 ```
 >> wanna -h
-
 Wanna transfer.
 
 Usage:
-  wanna upload [--no-encrypt] [--no-progress] [-v | -vv]
-               [--checksum] [--datacenter=<aws>] [--ignore--prefix] PATH
-  wanna download [--no-decrypt] [--no-progress] [-v | -vv]
-                 [--checksum] [--datacenter=<aws>] PATH
-  wanna delete [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] PATH
-  wanna search [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] TERM
-  wanna rename [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] OLD NEW
-  wanna ls [--datacenter=<aws>] [--ignore-prefix] [-v | -vv]
+  wanna upload PATH [--no-encrypt] [--no-progress] [--ignore--prefix]
+                    [--checksum] [--datacenter=<aws>] [-v | -vv]
+  wanna download PATH [--no-decrypt] [--no-progress] [--checksum]
+                      [--datacenter=<aws>] [-v | -vv]
+  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna search TERM [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
   wanna (-h | --help)
   wanna --version
 
@@ -79,7 +78,7 @@ Options:
 or from python:
 
 ```python
-from wanna import upload_file
+from wanna import Transfer
 
-upload_file(vendor='aws', path)
+Transfer(vendor='aws').upload_file(path)
 ```

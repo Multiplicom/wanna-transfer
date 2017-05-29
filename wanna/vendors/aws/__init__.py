@@ -26,7 +26,7 @@ import os.path
 import logging
 
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger('wanna:aws')
 
 
 class _AWS(object):
@@ -63,8 +63,12 @@ class _AWS(object):
         self.ignore_prefix = ignore_prefix
         self.config = config
 
-        if self.ignore_prefix:
-            self._prefix = ''
+        if ignore_prefix:
+            self._ignore_prefix()
+
+    def _ignore_prefix(self):
+        LOG.debug('ignore prefix mode')
+        self._prefix = ''
 
     def _get_extra_args(self):
         """Extra parameters"""
@@ -77,9 +81,12 @@ class _AWS(object):
             })
         return args
 
-    def get_obj_key(self, path, md5=False):
+    def get_obj_key(self, path, md5=False, ignore_prefix=False):
         """Get file object key"""
-        key = os.path.join(self._prefix, os.path.basename(path))
+        if ignore_prefix is False or not self._prefix:
+            key = path
+        else:
+            key = os.path.join(self._prefix, os.path.basename(path))
         if md5 is True:
             key = key + self.hash_checksum
         return key
@@ -135,7 +142,7 @@ class _AWS(object):
             self.client.copy(
                 copy_source, self._bucket, new_prefix, ExtraArgs=extra
             )
-            self.delete_file(old_prefix)
+            self.delete_file(old_prefix, ignore_prefix=True)
 
     def get_object_size(self, path):
         """Get object size"""
@@ -170,8 +177,11 @@ class _AWS(object):
                     'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']
                 }
 
-    def delete_file(self, path):
+    def delete_file(self, path, ignore_prefix=False):
         """Delete file object"""
-        key = self.get_obj_key(path)
-        with ignore_ctrl_c():
-            return self.client.delete_object(Bucket=self._bucket, Key=key)
+        path = path if ignore_prefix else self.get_obj_key(path)
+        if self.check_if_key_exists(path):
+            with ignore_ctrl_c():
+                return self.client.delete_object(Bucket=self._bucket, Key=path)
+        else:
+            raise KeyError('{} does not exist!'.format(path))

@@ -1,11 +1,7 @@
-from wanna.upload import upload_file
-from wanna.download import download_file
-from wanna.misc import list_files
-from wanna.misc import delete_file
 from wanna.vendors.aws import _AWS
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 ALIASES = {
     's3': _AWS,
@@ -17,22 +13,15 @@ ALIASES = {
 
 
 def setup_vendor(vendor_str, use_encryption=True, ignore_prefix=False):
-    """return vendor obj from given string"""
+    """Setup vendor from the given string and params"""
     vendor = vendor_str.lower()
     try:
         vendor = ALIASES[vendor]
     except KeyError:
         raise ValueError('datacenter: {}, is not supported'.format(vendor))
-    return vendor(use_encryption, ignore_prefix)
+    return vendor(use_encryption=use_encryption, ignore_prefix=ignore_prefix)
 
 
-class Transfer(object):
-
-    def __init__(self):
-        pass
-
-
-Transfer.upload_file = staticmethod(upload_file)
-Transfer.download_file = staticmethod(download_file)
-Transfer.delete_file = staticmethod(delete_file)
-Transfer.list_files = staticmethod(list_files)
+def Transfer(vendor='aws', use_encrpytion=True, ignore_prefix=True):
+    """A proxy to vendor"""
+    return setup_vendor(vendor, use_encrpytion, ignore_prefix)

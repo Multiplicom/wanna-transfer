@@ -2,14 +2,14 @@
 """Wanna transfer.
 
 Usage:
-  wanna upload [--no-encrypt] [--no-progress] [-v | -vv]
-               [--checksum] [--datacenter=<aws>] [--ignore--prefix] PATH
-  wanna download [--no-decrypt] [--no-progress] [-v | -vv]
-                 [--checksum] [--datacenter=<aws>] PATH
-  wanna delete [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] PATH
-  wanna search [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] TERM
-  wanna rename [--datacenter=<aws>] [--ignore-prefix] [-v | -vv] OLD NEW
-  wanna ls [--datacenter=<aws>] [--ignore-prefix] [-v | -vv]
+  wanna upload PATH [--no-encrypt] [--no-progress] [--ignore--prefix]
+                    [--checksum] [--datacenter=<aws>] [-v | -vv]
+  wanna download PATH [--no-decrypt] [--no-progress] [--checksum]
+                      [--datacenter=<aws>] [-v | -vv]
+  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna search TERM [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
   wanna (-h | --help)
   wanna --version
 
@@ -25,9 +25,9 @@ Options:
 """
 from docopt import docopt
 
-from wanna import upload_file
-from wanna import download_file
-from wanna import delete_file
+from wanna.upload import upload_file
+from wanna.download import download_file
+from wanna.misc import delete_file
 from wanna.misc import list_files
 from wanna.misc import rename_file
 from wanna.misc import search_files
@@ -38,7 +38,7 @@ import random
 import logging
 
 
-LOG = logging.getLogger('wanna')
+LOG = logging.getLogger('wanna:cli')
 
 
 def _handle(args):
@@ -65,6 +65,7 @@ def handle_upload(args):
     kwargs = _handle(args)
     LOG.info('Uploading {path}...'.format(**kwargs))
     upload_file(**kwargs)
+    print('Upload finished!')
 
 
 def handle_ls(args):
@@ -75,7 +76,8 @@ def handle_ls(args):
 
 def handle_rename(args):
     kwargs = _handle(args)
-    print(rename_file(**kwargs))
+    rename_file(**kwargs)
+    print('Done!')
 
 
 def handle_search(args):
@@ -87,13 +89,15 @@ def handle_search(args):
 def handle_download(args):
     kwargs = _handle(args)
     LOG.info('Getting {path}...'.format(**kwargs))
-    print(download_file(**kwargs))
+    download_file(**kwargs)
+    print('Download finished!')
 
 
 def handle_delete(args):
     kwargs = _handle(args)
     LOG.info('Deleting {path}...'.format(**kwargs))
     delete_file(**kwargs)
+    print('Done!')
 
 
 def handle_cry():
@@ -113,6 +117,8 @@ def main():
         logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     elif args['--verbose'] == 1:
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+    else:
+        logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 
     if args['upload'] is True:
         handle_upload(args)
