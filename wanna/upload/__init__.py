@@ -9,12 +9,12 @@ uploads to the cloud. It handles several things for the user:
 """
 
 
-def upload_file(
+def upload_files(
         path, vendor, use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False):
     """Uploads file to the cloud.
 
     Args:
-        path (str): path to the file
+        path (str): path to the file or folder
         vendor (str): datacenter name: 'aws|softlayer|azure|googlecloud'
         use_encryption (bool): should the file be server side encrypted
         add_checksum (bool): should the md5 checksum be uploaded next to the original file
@@ -25,14 +25,4 @@ def upload_file(
     """
     from wanna import setup_vendor
     vendor = setup_vendor(vendor, use_encryption, ignore_prefix)
-
-    if add_checksum:
-        vendor.get_checksum(path)
-
-    resp1 = vendor.upload_file(path, progress=progress)
-    resp2 = None
-
-    if add_checksum:
-        resp2 = vendor.upload_checksum(path)
-
-    return (resp1, resp2)
+    vendor.upload_files(path, add_checksum=add_checksum, progress=progress)

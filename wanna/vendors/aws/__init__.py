@@ -21,6 +21,7 @@ from wanna.settings import Config
 from boto3.s3.transfer import S3Transfer
 from botocore.client import Config as BotoConfig
 
+import glob
 import boto3
 import os.path
 import logging
@@ -83,7 +84,7 @@ class _AWS(object):
 
     def get_obj_key(self, path, md5=False, ignore_prefix=False):
         """Get file object key"""
-        if ignore_prefix is False or not self._prefix:
+        if ignore_prefix is True or self.ignore_prefix:
             key = path
         else:
             key = os.path.join(self._prefix, os.path.basename(path))
@@ -93,30 +94,38 @@ class _AWS(object):
 
     def get_checksum(self, path):
         """Calculate control sum"""
-        if self._checksum is None:
-            self._checksum = md5sum(path)
-        return self._checksum
+        return md5sum(path)
 
     def upload_checksum(self, path):
         """Upload control sum for the given file"""
-        LOG.info('uploading checksum')
+        LOG.debug('uploading checksum for: %s', path)
         key = self.get_obj_key(path, md5=True) if not self.ignore_prefix else path
         checksum = self.get_checksum(path)
         response = self.client.put_object(Bucket=self._bucket, Key=key, Body=checksum)
         LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
         return response
 
-    def upload_file(self, path, progress=False):
-        """Upload a file"""
-        key = self.get_obj_key(path)
-        progress_callback = ProgressPercentage(path) if progress else lambda x: None
-        extra_args = self._get_extra_args()
+    def upload_files(self, path, add_checksum=False, progress=False):
+        """Upload files"""
+        def get_files():
+            if os.path.isdir(path):
+                return glob.glob(os.path.join(path, '*'))
+            return [path]
 
-        with ignore_ctrl_c():
-            with self._transfer(self.client) as transfer:
-                response = transfer.upload_file(
-                    path, self._bucket, key, extra_args=extra_args, callback=progress_callback)
-        return response
+        for item in get_files():
+            itemname = os.path.basename(item)
+            key = self.get_obj_key(itemname)
+            progress_callback = ProgressPercentage(item) if progress else lambda x: None
+            extra_args = self._get_extra_args()
+
+            with ignore_ctrl_c():
+                with self._transfer(self.client) as transfer:
+                    LOG.debug('uploading %s', item)
+                    transfer.upload_file(
+                        item, self._bucket, key, extra_args=extra_args, callback=progress_callback)
+            print('')
+            if add_checksum:
+                self.upload_checksum(item)
 
     def search(self, term):
         """Fuzzy search for the object(s) using given term"""
@@ -151,21 +160,31 @@ class _AWS(object):
 
     def check_if_key_exists(self, key):
         """See if file/key exists"""
+        LOG.info('checking {}'.format(key))
         key = self.get_obj_key(key)
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return 'Contents' in resp
 
-    def download_file(self, path, progress=False, use_encryption=None):
+    def download_file(self, path, dst='.', progress=False, use_encryption=None):
         """Download a file"""
-        touch(path)
+        dst = dst or '.'
+        if os.path.isdir(dst):
+            local = os.path.join(dst, os.path.basename(path))
+        else:
+            local = dst
+        touch(local)
         key = self.get_obj_key(path)
-        progress_callback = ProgressPercentage(path, size=self.get_object_size(path)) if progress else lambda x: None
+        progress_callback = ProgressPercentage(path, size=self.get_object_size(key)) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args()
 
-        with ignore_ctrl_c():
-            with self._transfer(self.client) as transfer:
-                response = transfer.download_file(
-                    self._bucket, key, path, extra_args=extra_args, callback=progress_callback)
+        if self.check_if_key_exists(key):
+            with ignore_ctrl_c():
+                with self._transfer(self.client) as transfer:
+                    response = transfer.download_file(
+                        self._bucket, key, local, extra_args=extra_args, callback=progress_callback)
+            print('')
+        else:
+            raise KeyError('{} does not exist!'.format(path))
         return response
 
     def list_files(self):
@@ -179,7 +198,7 @@ class _AWS(object):
 
     def delete_file(self, path, ignore_prefix=False):
         """Delete file object"""
-        path = path if ignore_prefix else self.get_obj_key(path)
+        path = path if ignore_prefix is True else self.get_obj_key(path)
         if self.check_if_key_exists(path):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)

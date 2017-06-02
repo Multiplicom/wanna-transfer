@@ -10,12 +10,13 @@ import signal
 def fuzzyfinder(input, collection, accessor=lambda x: x):
     """
     Args:
-    input (str): A partial string which is typically entered by a user.
-    collection (iterable): A collection of strings which will be filtered
-                                       based on the `input`.
+        input (str): A partial string which is typically entered by a user.
+        collection (iterable): A collection of strings which will be filtered
+             based on the `input`.
+
     Returns:
-    suggestions (generator): A generator object that produces a list of
-    suggestions narrowed down from `collection` using the `input`.
+        suggestions (generator): A generator object that produces a list of
+         suggestions narrowed down from `collection` using the `input`.
     """
     suggestions = []
     input = str(input) if not isinstance(input, str) else input

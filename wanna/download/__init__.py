@@ -18,12 +18,13 @@ class IntegrityError(Exception):
 
 
 def download_file(
-        path, vendor, use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False):
+        path, vendor, dst='.', use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False):
     """Download file from the cloud.
 
     Args:
         path (str): path to the file
         vendor (str): datacenter name: 'aws|softlayer|azure|googlecloud'
+        dst (str): destination default .
         use_encryption (bool): should the file be decrypted
         add_checksum (bool): should the control sum be checked
         progress (bool): should the transfer be monitored
