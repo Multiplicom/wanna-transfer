@@ -37,7 +37,6 @@ import sys
 import random
 import logging
 
-
 LOG = logging.getLogger('wanna:cli')
 
 
@@ -46,12 +45,12 @@ def _handle(args):
         path = args['PATH']
         if args['upload'] or args['download']:
             add_checksum = args['--checksum']
-            use_encryption =  not(args['--no-encrypt'] or args['--no-decrypt'])
-            progress = not(args['--no-progress'])
+            use_encryption = not (args['--no-encrypt'] or args['--no-decrypt'])
+            progress = not (args['--no-progress'])
             if args['download']:
                 dst = args['DST']
     if args['rename']:
-        use_encryption =  not(args['--no-encrypt'] or args['--no-decrypt'])
+        use_encryption = not (args['--no-encrypt'] or args['--no-decrypt'])
         old = args['OLD']
         new = args['NEW']
     if args['search']:

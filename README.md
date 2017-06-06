@@ -80,5 +80,5 @@ or from python:
 ```python
 from wanna import Transfer
 
-Transfer(vendor='aws').upload_file(path)
+Transfer(vendor='aws').upload_files(path)
 ```

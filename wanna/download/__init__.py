@@ -7,6 +7,8 @@ download from the cloud. It handles several things for the user:
 * Progress callbacks to monitor transfers
 * Retries. When possible.
 """
+from wanna import setup_vendor
+
 import difflib
 import logging
 
@@ -18,7 +20,7 @@ class IntegrityError(Exception):
 
 
 def download_file(
-        path, vendor, dst='.', use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False):
+        path, vendor, dst='.', use_encryption=True, add_checksum=False, progress=False, ignore_prefix=False):
     """Download file from the cloud.
 
     Args:
@@ -28,21 +30,18 @@ def download_file(
         use_encryption (bool): should the file be decrypted
         add_checksum (bool): should the control sum be checked
         progress (bool): should the transfer be monitored
-        prefix (string): file prefix
         ignore_prefix (bool): ignore all prefixes
 
     Returns:
         obj - confirmation(s) from the vendor
     """
-    from wanna import setup_vendor
-
     vendor = setup_vendor(vendor, use_encryption, ignore_prefix)
 
     if add_checksum:
         chck_path = path + vendor.hash_checksum
         vendor.download_file(chck_path, use_encryption=False)
 
-    resp = vendor.download_file(path, progress=progress)
+    resp = vendor.download_file(path, dst=dst, progress=progress)
 
     if add_checksum:
         with open(chck_path, 'rb') as chck_file:

@@ -26,7 +26,6 @@ import boto3
 import os.path
 import logging
 
-
 LOG = logging.getLogger('wanna:aws')
 
 
@@ -48,8 +47,7 @@ class _AWS(object):
         return {
             'aws_access_key_id': config.VENDOR.API_KEY,
             'aws_secret_access_key': config.VENDOR.API_SECRET,
-            'config': BotoConfig(signature_version=self.signature_version,
-                                 region_name=self.region_name)
+            'config': BotoConfig(signature_version=self.signature_version, region_name=self.region_name)
         }
 
     def __init__(self, use_encryption=True, ignore_prefix=False):
@@ -92,7 +90,8 @@ class _AWS(object):
             key = key + self.hash_checksum
         return key
 
-    def get_checksum(self, path):
+    @staticmethod
+    def get_checksum(path):
         """Calculate control sum"""
         return md5sum(path)
 
@@ -107,6 +106,7 @@ class _AWS(object):
 
     def upload_files(self, path, add_checksum=False, progress=False):
         """Upload files"""
+
         def get_files():
             if os.path.isdir(path):
                 return glob.glob(os.path.join(path, '*'))
@@ -121,8 +121,7 @@ class _AWS(object):
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
                     LOG.debug('uploading %s', item)
-                    transfer.upload_file(
-                        item, self._bucket, key, extra_args=extra_args, callback=progress_callback)
+                    transfer.upload_file(item, self._bucket, key, extra_args=extra_args, callback=progress_callback)
             print('')
             if add_checksum:
                 self.upload_checksum(item)
@@ -136,21 +135,17 @@ class _AWS(object):
     def rename_object(self, old_prefix, new_prefix):
         """Rename object"""
         LOG.warning(':ignoring all prefixes')
-        copy_source = {
-            'Bucket': self._bucket,
-            'Key': old_prefix
-        }
+        copy_source = {'Bucket': self._bucket, 'Key': old_prefix}
         extra = self._get_extra_args()
         if self._encrypt:
-            extra.update(dict(
-                CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
-                CopySourceSSECustomerKey=self.config.ENCRYPTION_KEY))
+            extra.update(
+                dict(
+                    CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
+                    CopySourceSSECustomerKey=self.config.ENCRYPTION_KEY))
 
         with ignore_ctrl_c():
             LOG.info(':renaming')
-            self.client.copy(
-                copy_source, self._bucket, new_prefix, ExtraArgs=extra
-            )
+            self.client.copy(copy_source, self._bucket, new_prefix, ExtraArgs=extra)
             self.delete_file(old_prefix, ignore_prefix=True)
 
     def get_object_size(self, path):
@@ -192,9 +187,7 @@ class _AWS(object):
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=self._prefix)
         if 'Contents' in resp:
             for el in resp['Contents']:
-                yield {
-                    'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']
-                }
+                yield {'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']}
 
     def delete_file(self, path, ignore_prefix=False):
         """Delete file object"""
@@ -202,5 +195,4 @@ class _AWS(object):
         if self.check_if_key_exists(path):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
-        else:
-            raise KeyError('{} does not exist!'.format(path))
+        raise KeyError('{} does not exist!'.format(path))
