@@ -17,7 +17,7 @@ And run it:
 Links
 `````
 * `development
-  <https://github.com/piotrpawlaczek/wanna-transfer>`_
+  <https://github.com/Multiplicom/wanna-transfer>`_
 """
 import re
 import codecs
@@ -53,7 +53,7 @@ setup_options = dict(
     long_description=__doc__,
     author='Piotr Pawlaczek',
     author_email='info@pawlaczek.pl',
-    url='http://github.com/piotrpawlaczek/wanna-transfer',
+    url='http://github.com/Multiplicom/wanna-transfer',
     entry_points={
         'console_scripts': ['wanna = wanna.entry_points.wannacli:main']
     },
@@ -61,11 +61,12 @@ setup_options = dict(
     install_requires=requires,
     zip_safe=False,
     license="BSD",
-    classifiers=(
+    classifiers=list((
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Natural Language :: English',
+        'Environment :: Console',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
@@ -76,7 +77,7 @@ setup_options = dict(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: PyPy'
-    ),
+    )),
 )
 
 setup(**setup_options)
