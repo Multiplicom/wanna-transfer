@@ -1,6 +1,6 @@
 An efficient transfer to the cloud
 ----------------------------------
-[![Build Status](https://travis-ci.org/Multiplicom/wanna-transfer.svg?branch=master)](https://travis-ci.org/piotrpawlaczek/wanna-transfer)
+[![Build Status](https://travis-ci.org/Multiplicom/wanna-transfer.svg?branch=master)](https://travis-ci.org/Multiplicom/wanna-transfer)
 [![PyPI version](https://badge.fury.io/py/wanna-transfer.svg)](https://badge.fury.io/py/wanna-transfer)
 
 The main goal of this tool is to provide efficient and reliable upload/download
