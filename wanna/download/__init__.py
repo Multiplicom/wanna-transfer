@@ -20,7 +20,9 @@ class IntegrityError(Exception):
 
 
 def download_file(
-        path, vendor, dst='.', use_encryption=True, add_checksum=False, progress=False, ignore_prefix=False):
+        path, vendor, dst='.', bucket=None,
+        use_encryption=True, add_checksum=False, progress=False, ignore_prefix=False
+):
     """Download file from the cloud.
 
     Args:
@@ -35,7 +37,7 @@ def download_file(
     Returns:
         obj - confirmation(s) from the vendor
     """
-    vendor = setup_vendor(vendor, use_encryption, ignore_prefix)
+    vendor = setup_vendor(vendor, bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix)
 
     if add_checksum:
         chck_path = path + vendor.hash_checksum

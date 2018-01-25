@@ -12,6 +12,7 @@ class Config(object):
     ENCRYPTION_ALGORITHM = 'AES256'
     UPLOAD_PREFIX = 'in'
     BUCKET = 'mtp-cloudstorage'
+    IGNORE_PREFIX = False
 
     def __init__(self, vendor):
         config = configparser.ConfigParser()
@@ -22,6 +23,10 @@ class Config(object):
         self.UPLOAD_PREFIX = config.get('default', 'upload_prefix', fallback='not-set')
         self.BUCKET = config.get('default', 'bucket', fallback=self.BUCKET)
         self.VENDOR = DATACENTERS[vendor.name.lower()](config)
+
+        ignore_prefix = config.get('default', 'ignore_prefix', fallback=False)
+
+        self.IGNORE_PREFIX = True if ignore_prefix == 'true' else False
 
 
 class AWS(object):

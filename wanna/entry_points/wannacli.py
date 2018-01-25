@@ -3,13 +3,14 @@
 
 Usage:
   wanna upload PATH [--no-encrypt] [--no-progress] [--ignore-prefix]
-                    [--checksum] [--datacenter=<aws>] [-v | -vv]
+                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv]
   wanna download PATH [DST] [--no-decrypt] [--no-progress] [--checksum]
-                            [--datacenter=<aws>] [--ignore-prefix] [-v | -vv]
-  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
-  wanna search TERM [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
-  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt] [-v | -vv]
-  wanna ls [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+                            [--datacenter=<aws>]  [--bucket=<credentials>] [--ignore-prefix] [-v | -vv]
+  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+  wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
+  wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna (-h | --help)
   wanna --version
 
@@ -22,6 +23,7 @@ Options:
   --no-decrypt   Do not decrypt in transit.
   --ignore-prefix  Ignore all prefixes
   --datacenter=<name>  Cloud provider [default: aws]
+  --bucket=<name>  Bucket name [default: credentials]
 """
 from docopt import docopt
 
@@ -29,6 +31,7 @@ from wanna.upload import upload_files
 from wanna.download import download_file
 from wanna.misc import delete_file
 from wanna.misc import list_files
+from wanna.misc import get_status
 from wanna.misc import rename_file
 from wanna.misc import search_files
 from wanna import __version__ as version
@@ -57,6 +60,7 @@ def _handle(args):
         term = args['TERM']
     vendor = args['--datacenter']
     ignore_prefix = args['--ignore-prefix']
+    bucket = None if args['--bucket'] == 'credentials' else args['--bucket']
     args = locals()
     args.pop('args')
     LOG.debug(args)
@@ -102,6 +106,19 @@ def handle_delete(args):
     print('Done!')
 
 
+def handle_status(args):
+    kwargs = _handle(args)
+    resp = get_status(**kwargs)
+    if 'TagSet' in resp:
+        for item in resp['TagSet']:
+            for key, value in item.items():
+                if item[key] == 'state':
+                    print('import_status: {}'.format(item['Value']))
+                    return
+        else:
+            print('import_status: init')
+
+
 def handle_cry():
     from pygments.console import codes
     code = 'Hahahah, you wanna cry...'
@@ -139,6 +156,9 @@ def main():
 
     if args['rename'] is True:
         handle_rename(args)
+
+    if args['status'] is True:
+        handle_status(args)
 
 
 if __name__ == '__main__':

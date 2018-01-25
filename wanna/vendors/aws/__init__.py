@@ -50,16 +50,16 @@ class _AWS(object):
             'config': BotoConfig(signature_version=self.signature_version, region_name=self.region_name)
         }
 
-    def __init__(self, use_encryption=True, ignore_prefix=False):
+    def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False):
         config = Config(self)
-        self._bucket = config.BUCKET
+        self._bucket = config.BUCKET if not bucket else bucket
         self._prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
         self.client = boto3.client(self.service, **self._get_config(config))
         self.resource = boto3.resource('s3', **self._get_config(config))
         self._transfer = S3Transfer
         self._checksum = None
-        self.ignore_prefix = ignore_prefix
+        self.ignore_prefix = ignore_prefix or config.IGNORE_PREFIX
         self.config = config
 
         if ignore_prefix:
@@ -169,14 +169,15 @@ class _AWS(object):
             local = dst
         touch(local)
         key = self.get_obj_key(path)
-        progress_callback = ProgressPercentage(path, size=self.get_object_size(key)) if progress else lambda x: None
+        progress_callback = ProgressPercentage(local, size=self.get_object_size(key)) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args()
 
         if self.check_if_key_exists(key):
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
                     response = transfer.download_file(
-                        self._bucket, key, local, extra_args=extra_args, callback=progress_callback)
+                        self._bucket, key, local, extra_args=extra_args, callback=progress_callback
+                    )
             print('')
         else:
             raise KeyError('{} does not exist!'.format(path))
@@ -196,3 +197,7 @@ class _AWS(object):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
         raise KeyError('{} does not exist!'.format(path))
+
+    def get_status(self, path, ingore_prefix=False):
+        """Get status from tag data"""
+        return self.client.get_object_tagging(Bucket=self._bucket, Key=path)

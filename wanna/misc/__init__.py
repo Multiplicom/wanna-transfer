@@ -22,3 +22,8 @@ def rename_file(vendor, old, new, **kwargs):
 def list_files(vendor, **kwargs):
     vendor = setup_vendor(vendor, **kwargs)
     return vendor.list_files()
+
+
+def get_status(vendor, path, **kwargs):
+    vendor = setup_vendor(vendor, **kwargs)
+    return vendor.get_status(path)
