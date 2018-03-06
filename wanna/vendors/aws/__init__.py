@@ -160,7 +160,7 @@ class _AWS(object):
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return 'Contents' in resp
 
-    def download_file(self, path, dst='.', progress=False, use_encryption=None):
+    def download_file(self, path, dst='.', progress=False, use_encryption=None, encryption_key=None):
         """Download a file"""
         dst = dst or '.'
         if os.path.isdir(dst):
@@ -171,6 +171,9 @@ class _AWS(object):
         key = self.get_obj_key(path)
         progress_callback = ProgressPercentage(local, size=self.get_object_size(key)) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args()
+
+        if encryption_key:
+            extra_args['SSECustomerKey'] = encryption_key
 
         if self.check_if_key_exists(key):
             with ignore_ctrl_c():

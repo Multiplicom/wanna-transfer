@@ -10,6 +10,7 @@ Usage:
   wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
   wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+  wanna generate_secret [-v | -vv]
   wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna (-h | --help)
   wanna --version
@@ -36,9 +37,11 @@ from wanna.misc import rename_file
 from wanna.misc import search_files
 from wanna import __version__ as version
 
+import os
 import sys
 import random
 import logging
+import binascii
 
 LOG = logging.getLogger('wanna:cli')
 
@@ -90,6 +93,10 @@ def handle_search(args):
     kwargs = _handle(args)
     for el in search_files(**kwargs):
         print(el)
+
+
+def handle_secret(args):
+    print(binascii.b2a_hex(os.urandom(32)))
 
 
 def handle_download(args):
@@ -159,6 +166,9 @@ def main():
 
     if args['status'] is True:
         handle_status(args)
+
+    if args['generate_secret'] is True:
+        handle_secret(args)
 
 
 if __name__ == '__main__':
