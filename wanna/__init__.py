@@ -1,7 +1,7 @@
 from wanna.vendors.aws import _AWS
 
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 ALIASES = {
     's3': _AWS,
@@ -12,7 +12,7 @@ ALIASES = {
 }
 
 
-def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=False):
+def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=False, **other):
     """Setup vendor from the given string and params"""
     vendor = vendor_str.lower()
     try:
@@ -20,7 +20,7 @@ def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=Fal
     except KeyError:
         raise ValueError('datacenter: {}, is not supported'.format(vendor))
     return vendor(
-        bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix)
+        bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, **other)
 
 
 def Transfer(vendor='aws', bucket=None, use_encrpytion=True, ignore_prefix=True):

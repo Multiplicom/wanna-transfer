@@ -50,7 +50,7 @@ class _AWS(object):
             'config': BotoConfig(signature_version=self.signature_version, region_name=self.region_name)
         }
 
-    def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False):
+    def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False, humanized=False):
         config = Config(self)
         self._bucket = config.BUCKET if not bucket else bucket
         self._prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
@@ -61,6 +61,7 @@ class _AWS(object):
         self._checksum = None
         self.ignore_prefix = ignore_prefix or config.IGNORE_PREFIX
         self.config = config
+        self._humanized = humanized
 
         if ignore_prefix:
             self._ignore_prefix()
@@ -115,7 +116,7 @@ class _AWS(object):
         for item in get_files():
             itemname = os.path.basename(item)
             key = self.get_obj_key(itemname)
-            progress_callback = ProgressPercentage(item) if progress else lambda x: None
+            progress_callback = ProgressPercentage(item, humanized=self._humanized) if progress else lambda x: None
             extra_args = self._get_extra_args()
 
             with ignore_ctrl_c():
@@ -169,7 +170,7 @@ class _AWS(object):
             local = dst
         touch(local)
         key = self.get_obj_key(path)
-        progress_callback = ProgressPercentage(local, size=self.get_object_size(key)) if progress else lambda x: None
+        progress_callback = ProgressPercentage(local, size=self.get_object_size(key), humanized=self._humanized) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args()
 
         if encryption_key:

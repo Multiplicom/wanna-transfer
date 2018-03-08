@@ -3,15 +3,15 @@
 
 Usage:
   wanna upload PATH [--no-encrypt] [--no-progress] [--ignore-prefix]
-                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv]
+                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv] [-H | --human]
   wanna download PATH [DST] [--no-decrypt] [--no-progress] [--checksum]
-                            [--datacenter=<aws>]  [--bucket=<credentials>] [--ignore-prefix] [-v | -vv]
+                            [--datacenter=<aws>]  [--bucket=<credentials>] [--ignore-prefix] [-v | -vv] [-H | --human]
   wanna delete PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
   wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
   wanna generate_secret [-v | -vv]
-  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human]
   wanna (-h | --help)
   wanna --version
 
@@ -36,6 +36,8 @@ from wanna.misc import get_status
 from wanna.misc import rename_file
 from wanna.misc import search_files
 from wanna import __version__ as version
+
+from wanna.utils import humanize
 
 import os
 import sys
@@ -64,6 +66,7 @@ def _handle(args):
     vendor = args['--datacenter']
     ignore_prefix = args['--ignore-prefix']
     bucket = None if args['--bucket'] == 'credentials' else args['--bucket']
+    humanized = any((args['-H'], args['--human']))
     args = locals()
     args.pop('args')
     LOG.debug(args)
@@ -80,7 +83,10 @@ def handle_upload(args):
 def handle_ls(args):
     kwargs = _handle(args)
     for el in list_files(**kwargs):
-        print('{}\t {}\t\t {}'.format(el['date'].isoformat(), el['size'], el['name']))
+        reported_size = humanize(
+            el['size']) if kwargs['humanized'] else el['size']
+        print('{}\t {}\t\t {}'.format(
+            el['date'].isoformat(), reported_size, el['name']))
 
 
 def handle_rename(args):
