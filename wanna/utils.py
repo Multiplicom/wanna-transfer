@@ -13,12 +13,16 @@ suffixes = {
 }
 
 def humanize(value, binary=True, format='%.1f'):
-    """Format a number of byteslike a human readable filesize (eg. 10 kB).  By
-    default, decimal suffixes (kB, MB) are used.  Passing binary=true will use
-    binary suffixes (KiB, MiB) are used and the base will be 2**10 instead of
-    10**3.  If ``gnu`` is True, the binary argument is ignored and GNU-style
-    (ls -sh style) prefixes are used (K, M) with the 2**10 definition.
-    Non-gnu modes are compatible with jinja2's ``filesizeformat`` filter."""
+    """
+    Format number of bytes like a human readable filesize (eg. 10 kB).
+    Args: 
+        value (numeric): number of bytes
+        binary (bool): use binary base (1024) or decimal (1000)
+        format (string): optional format string
+
+    Returns:
+        filesize-like formatted string
+    """
 
     suffix = suffixes['binary'] if binary else suffixes['decimal']
 
