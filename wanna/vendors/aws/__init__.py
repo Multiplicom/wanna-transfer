@@ -133,16 +133,17 @@ class _AWS(object):
         for obj in fuzzyfinder(term, (obj.key for obj in bucket.objects.all())):
             yield obj
 
-    def rename_object(self, old_prefix, new_prefix):
+    def rename_object(self, old_prefix, new_prefix, encryption_key=None):
         """Rename object"""
         LOG.warning(':ignoring all prefixes')
+        encryption_key = encryption_key or self.config.ENCRYPTION_KEY
         copy_source = {'Bucket': self._bucket, 'Key': old_prefix}
         extra = self._get_extra_args()
         if self._encrypt:
             extra.update(
                 dict(
                     CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
-                    CopySourceSSECustomerKey=self.config.ENCRYPTION_KEY))
+                    CopySourceSSECustomerKey=encryption_key))
 
         with ignore_ctrl_c():
             LOG.info(':renaming')
@@ -170,7 +171,9 @@ class _AWS(object):
             local = dst
         touch(local)
         key = self.get_obj_key(path)
-        progress_callback = ProgressPercentage(local, size=self.get_object_size(key), humanized=self._humanized) if progress else lambda x: None
+        progress_callback = ProgressPercentage(
+            local, size=self.get_object_size(key), humanized=self._humanized
+        ) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args()
 
         if encryption_key:
