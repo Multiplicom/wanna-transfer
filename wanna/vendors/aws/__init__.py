@@ -66,18 +66,23 @@ class _AWS(object):
         if ignore_prefix:
             self._ignore_prefix()
 
+    def get_encryption_key(self, key=None):
+        if key:
+            return bytes(bytearray.fromhex(key))
+        return self.config.ENCRYPTION_KEY
+
     def _ignore_prefix(self):
         LOG.debug('ignore prefix mode')
         self._prefix = ''
 
-    def _get_extra_args(self):
+    def _get_extra_args(self, encryption_key=None):
         """Extra parameters"""
         args = {}
         if self._encrypt:
             LOG.info('using encryption: {}'.format(self.config.ENCRYPTION_ALGORITHM))
             args.update({
                 'SSECustomerAlgorithm': self.config.ENCRYPTION_ALGORITHM,
-                'SSECustomerKey': self.config.ENCRYPTION_KEY,
+                'SSECustomerKey': self.get_encryption_key(encryption_key),
             })
         return args
 
@@ -135,24 +140,34 @@ class _AWS(object):
 
     def rename_object(self, old_prefix, new_prefix, encryption_key=None):
         """Rename object"""
+        if old_prefix == new_prefix:
+            LOG.info(':renaming skipped, old and new name are the same')
+            return
+
         LOG.warning(':ignoring all prefixes')
         encryption_key = encryption_key or self.config.ENCRYPTION_KEY
         copy_source = {'Bucket': self._bucket, 'Key': old_prefix}
-        extra = self._get_extra_args()
+        extra = self._get_extra_args(encryption_key)
         if self._encrypt:
             extra.update(
                 dict(
                     CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
-                    CopySourceSSECustomerKey=encryption_key))
+                    CopySourceSSECustomerKey=self.get_encryption_key(encryption_key)
+                )
+            )
 
         with ignore_ctrl_c():
             LOG.info(':renaming')
             self.client.copy(copy_source, self._bucket, new_prefix, ExtraArgs=extra)
             self.delete_file(old_prefix, ignore_prefix=True)
 
-    def get_object_size(self, path):
+    def get_object_size(self, path, encryption_key=None):
         """Get object size"""
-        response = self.client.head_object(Bucket=self._bucket, Key=self.get_obj_key(path), **self._get_extra_args())
+        response = self.client.head_object(
+            Bucket=self._bucket,
+            Key=self.get_obj_key(path),
+            **self._get_extra_args(encryption_key)
+        )
         return response['ContentLength']
 
     def check_if_key_exists(self, key):
@@ -172,12 +187,9 @@ class _AWS(object):
         touch(local)
         key = self.get_obj_key(path)
         progress_callback = ProgressPercentage(
-            local, size=self.get_object_size(key), humanized=self._humanized
+            local, size=self.get_object_size(key, encryption_key=encryption_key), humanized=self._humanized
         ) if progress else lambda x: None
-        extra_args = {} if use_encryption is False else self._get_extra_args()
-
-        if encryption_key:
-            extra_args['SSECustomerKey'] = encryption_key
+        extra_args = {} if use_encryption is False else self._get_extra_args(encryption_key=encryption_key)
 
         if self.check_if_key_exists(key):
             with ignore_ctrl_c():
