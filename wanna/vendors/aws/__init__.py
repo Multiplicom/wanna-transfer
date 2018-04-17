@@ -68,7 +68,11 @@ class _AWS(object):
 
     def get_encryption_key(self, key=None):
         if key:
-            return bytes(bytearray.fromhex(key))
+            try:
+                return bytes(bytearray.fromhex(key))
+            except ValueError as error:
+                LOG.warning('{}, enc key: {}'.fomat(error, key))
+                return key
         return self.config.ENCRYPTION_KEY
 
     def _ignore_prefix(self):
@@ -145,7 +149,6 @@ class _AWS(object):
             return
 
         LOG.warning(':ignoring all prefixes')
-        encryption_key = encryption_key or self.config.ENCRYPTION_KEY
         copy_source = {'Bucket': self._bucket, 'Key': old_prefix}
         extra = self._get_extra_args(encryption_key)
         if self._encrypt:
