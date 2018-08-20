@@ -14,7 +14,7 @@ class Config(object):
     BUCKET = 'mtp-cloudstorage'
     IGNORE_PREFIX = False
 
-    def __init__(self, vendor):
+    def __init__(self, vendor, profile=None):
         config = configparser.ConfigParser()
         config.read(os.path.expanduser('~/.wanna/credentials'))
 
@@ -22,7 +22,7 @@ class Config(object):
         self.ENCRYPTION_KEY = bytes(bytearray.fromhex(config.get('default', 'encryption_key', fallback='0000')))
         self.UPLOAD_PREFIX = config.get('default', 'upload_prefix', fallback='not-set')
         self.BUCKET = config.get('default', 'bucket', fallback=self.BUCKET)
-        self.VENDOR = DATACENTERS[vendor.name.lower()](config)
+        self.VENDOR = DATACENTERS[vendor.name.lower()](config, profile)
 
         ignore_prefix = config.get('default', 'ignore_prefix', fallback=False)
 
@@ -31,9 +31,9 @@ class Config(object):
 
 class AWS(object):
     """Aws specific settings"""
-    def __init__(self, cfg):
-        self.API_KEY = cfg.get('aws', 'aws_access_key_id', fallback='missing')
-        self.API_SECRET = cfg.get('aws', 'aws_secret_access_key', fallback='missing')
+    def __init__(self, cfg, profile=None):
+        self.API_KEY = cfg.get(profile if profile else 'aws', 'aws_access_key_id', fallback='missing')
+        self.API_SECRET = cfg.get(profile if profile else 'aws', 'aws_secret_access_key', fallback='missing')
 
 
 DATACENTERS = {

@@ -43,7 +43,9 @@ def find_version(*file_paths):
 requires = [
     'docopt==0.6.2',
     'boto3==1.4.4',
-    'configparser==3.5.0'
+    'configparser==3.5.0',
+    'pytest==3.7.2',
+    'mock==2.0.0'
 ]
 
 setup_options = dict(
