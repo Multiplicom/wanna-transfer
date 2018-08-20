@@ -11,7 +11,7 @@ uploads to the cloud. It handles several things for the user:
 
 def upload_files(
         path, vendor, bucket=None,
-        use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False, humanized=False):
+        use_encryption=True, add_checksum=False, progress=False, prefix=None, ignore_prefix=False, humanized=False, **other):
     """Uploads file to the cloud.
 
     Args:
@@ -25,5 +25,5 @@ def upload_files(
         tuple - confirmation(s) from the vendor
     """
     from wanna import setup_vendor
-    vendor = setup_vendor(vendor, bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, humanized=humanized)
+    vendor = setup_vendor(vendor, bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, humanized=humanized, **other)
     vendor.upload_files(path, add_checksum=add_checksum, progress=progress)
