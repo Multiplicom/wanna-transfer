@@ -30,7 +30,7 @@ LOG = logging.getLogger('wanna:aws')
 
 
 class _AWS(object):
-    """AWS s3 service"""
+    """AWS S3 service"""
     hash_checksum = '.md5'
     signature_version = 's3v4'
     region_name = 'eu-central-1'
@@ -50,8 +50,8 @@ class _AWS(object):
             'config': BotoConfig(signature_version=self.signature_version, region_name=self.region_name)
         }
 
-    def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False, humanized=False):
-        config = Config(self)
+    def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False, humanized=False, profile=None):
+        config = Config(self, profile=profile)
         self._bucket = config.BUCKET if not bucket else bucket
         self._prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption

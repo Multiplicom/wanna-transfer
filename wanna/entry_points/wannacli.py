@@ -3,15 +3,20 @@
 
 Usage:
   wanna upload PATH [--no-encrypt] [--no-progress] [--ignore-prefix]
-                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv] [-H | --human]
+                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv] [-H | --human] 
+                    [--profile=<name>]
   wanna download PATH [DST] [--no-decrypt] [--no-progress] [--checksum]
                             [--datacenter=<aws>]  [--bucket=<credentials>] [--ignore-prefix] [-v | -vv] [-H | --human]
+                            [--profile=<name>]
   wanna delete PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+                    [--profile=<name>]
   wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+                    [--profile=<name>]
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
-  wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
-  wanna generate_secret [-v | -vv]
-  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human]
+                       [--profile=<name>]
+  wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [--profile=<name>]
+  wanna generate_secret [-v | -vv] [--profile=<name>]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human] [--profile=<name>]
   wanna (-h | --help)
   wanna --version
 
@@ -23,6 +28,7 @@ Options:
   --no-encrypt   Do not encrypt at rest.
   --no-decrypt   Do not decrypt in transit.
   --ignore-prefix  Ignore all prefixes
+  --profile=<name>  Use a named profile [default: aws]
   --datacenter=<name>  Cloud provider [default: aws]
   --bucket=<name>  Bucket name [default: credentials]
 """
@@ -65,6 +71,8 @@ def _handle(args):
         term = args['TERM']
     vendor = args['--datacenter']
     ignore_prefix = args['--ignore-prefix']
+    
+    profile = args['--profile'] if args['--profile'] else None
     bucket = None if args['--bucket'] == 'credentials' else args['--bucket']
     humanized = any((args['-H'], args['--human']))
     args = locals()

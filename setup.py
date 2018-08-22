@@ -46,6 +46,10 @@ requires = [
     'configparser==3.5.0'
 ]
 
+test_requires = [
+    'mock==2.0.0'
+]
+
 setup_options = dict(
     name='wanna-transfer',
     version=find_version("wanna", "__init__.py"),
@@ -59,6 +63,7 @@ setup_options = dict(
     },
     packages=find_packages(exclude=['tests*']),
     install_requires=requires,
+    test_requires=test_requires,
     zip_safe=False,
     license="BSD",
     classifiers=list((
