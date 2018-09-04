@@ -12,7 +12,7 @@ ALIASES = {
 }
 
 
-def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=False, **other):
+def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=False, profile=None, **other):
     """Setup vendor from the given string and params"""
     vendor = vendor_str.lower()
     try:
@@ -20,11 +20,11 @@ def setup_vendor(vendor_str, bucket=None, use_encryption=True, ignore_prefix=Fal
     except KeyError:
         raise ValueError('datacenter: {}, is not supported'.format(vendor))
     return vendor(
-        bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, **other)
+        bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, profile=profile, **other)
 
 
-def Transfer(vendor='aws', bucket=None, use_encrpytion=True, ignore_prefix=True):
+def Transfer(vendor='aws', bucket=None, use_encrpytion=True, ignore_prefix=True, profile=None):
     """A proxy to vendor"""
     return setup_vendor(
-        vendor, bucket=bucket, use_encryption=use_encrpytion, ignore_prefix=ignore_prefix
+        vendor, bucket=bucket, use_encryption=use_encrpytion, ignore_prefix=ignore_prefix, profile=profile
     )

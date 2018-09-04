@@ -41,9 +41,14 @@ partner = partner-name
 bucket = your-space
 upload_prefix = in
 
+# this is the default profile
 [aws]
 aws_access_key_id = your_key_id
 aws_secret_access_key = your_secret_key
+
+[dev]
+aws_access_key_id = your_key_dev_id
+aws_secret_access_key = your_dev_secret_key
 ```
 
 Usage
