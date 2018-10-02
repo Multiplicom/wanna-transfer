@@ -22,7 +22,7 @@ class IntegrityError(Exception):
 def download_file(
         path, vendor, dst='.', bucket=None,
         use_encryption=True, add_checksum=False, progress=False, ignore_prefix=False,
-        encryption_key=None, humanized=False):
+        encryption_key=None, humanized=False, **kwargs):
     """Download file from the cloud.
 
     Args:
