@@ -32,6 +32,8 @@ Installation
 ```
 Create a configuration file under ~/.wanna/credentials
 
+> ⚠️ wanna-transfer will use the profile **aws** if no profile is selected either from the CLI or in the API.
+
 Example:
 
 ```ini
@@ -59,26 +61,23 @@ from the command line:
 Wanna transfer.
 
 Usage:
-  wanna upload PATH [--no-encrypt] [--no-progress] [--ignore--prefix]
-                    [--checksum] [--datacenter=<aws>] [-v | -vv]
-  wanna download PATH [--no-decrypt] [--no-progress] [--checksum]
-                      [--datacenter=<aws>] [-v | -vv]
-  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
-  wanna search TERM [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
-  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
-  wanna ls [--ignore-prefix] [--datacenter=<aws>] [-v | -vv]
+  wanna upload PATH [--no-encrypt] [--no-progress] [--ignore-prefix]
+                    [--checksum] [--datacenter=<aws>] [--bucket=<credentials>] [-v | -vv] [-H | --human]
+                    [--profile=<name>]
+  wanna download PATH [DST] [--no-decrypt] [--no-progress] [--checksum]
+                            [--datacenter=<aws>]  [--bucket=<credentials>] [--ignore-prefix] [-v | -vv] [-H | --human]
+                            [--profile=<name>]
+  wanna delete PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+                    [--profile=<name>]
+  wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+                    [--profile=<name>]
+  wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
+                       [--profile=<name>]
+  wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [--profile=<name>]
+  wanna generate_secret [-v | -vv] [--profile=<name>]
+  wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human] [--profile=<name>]
   wanna (-h | --help)
   wanna --version
-
-Options:
-  -h --help      Show this message and exit.
-  -v --verbose   Show more text.
-  --version      Show version and exit.
-  --no-progress  Do not show progress bar.
-  --no-encrypt   Do not encrypt at rest.
-  --no-decrypt   Do not decrypt in transit.
-  --ignore-prefix  Ignore all prefixes
-  --datacenter=<name>  Cloud provider [default: aws]
 ```
 or from python:
 
