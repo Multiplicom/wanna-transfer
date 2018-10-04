@@ -114,7 +114,7 @@ class _AWS(object):
         LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
         return response
 
-    def upload_files(self, path, add_checksum=False, progress=False):
+    def upload_files(self, path, add_checksum=False, progress=False, encryption_key=None):
         """Upload files"""
 
         def get_files():
@@ -126,7 +126,7 @@ class _AWS(object):
             itemname = os.path.basename(item)
             key = self.get_obj_key(itemname)
             progress_callback = ProgressPercentage(item, humanized=self._humanized) if progress else lambda x: None
-            extra_args = self._get_extra_args()
+            extra_args = {} if use_encryption is False else self._get_extra_args(encryption_key=encryption_key)
 
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:

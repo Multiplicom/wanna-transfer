@@ -15,7 +15,7 @@ Usage:
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
                        [--profile=<name>]
   wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [--profile=<name>]
-  wanna generate_secret [-v | -vv] [--profile=<name>]
+  wanna generate_secret [-v | -vv]
   wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human] [--profile=<name>]
   wanna (-h | --help)
   wanna --version
