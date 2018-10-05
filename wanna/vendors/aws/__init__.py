@@ -71,7 +71,7 @@ class _AWS(object):
             try:
                 return bytes(bytearray.fromhex(key))
             except ValueError as error:
-                LOG.warning('{}, enc key: {}'.fomat(error, key))
+                LOG.warning('{}, enc key: {}'.format(error, key))
                 return key
         return self.config.ENCRYPTION_KEY
 
@@ -126,7 +126,7 @@ class _AWS(object):
             itemname = os.path.basename(item)
             key = self.get_obj_key(itemname)
             progress_callback = ProgressPercentage(item, humanized=self._humanized) if progress else lambda x: None
-            extra_args = {} if use_encryption is False else self._get_extra_args(encryption_key=encryption_key)
+            extra_args = {} if self._encrypt is False else self._get_extra_args(encryption_key=encryption_key)
 
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
