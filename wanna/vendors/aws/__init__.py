@@ -53,7 +53,7 @@ class _AWS(object):
     def __init__(self, bucket=None, use_encryption=True, ignore_prefix=False, humanized=False, profile=None):
         config = Config(self, profile=profile)
         self._bucket = config.BUCKET if not bucket else bucket
-        self._prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
+        self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
         self.client = boto3.client(self.service, **self._get_config(config))
         self.resource = boto3.resource('s3', **self._get_config(config))
@@ -63,7 +63,7 @@ class _AWS(object):
         self.config = config
         self._humanized = humanized
 
-        if ignore_prefix:
+        if self.ignore_prefix:
             self._ignore_prefix()
 
     def get_encryption_key(self, key=None):
@@ -77,7 +77,7 @@ class _AWS(object):
 
     def _ignore_prefix(self):
         LOG.debug('ignore prefix mode')
-        self._prefix = ''
+        self._default_prefix = ''
 
     def _get_extra_args(self, encryption_key=None):
         """Extra parameters"""
@@ -90,12 +90,13 @@ class _AWS(object):
             })
         return args
 
-    def get_obj_key(self, path, md5=False, ignore_prefix=False):
+    def get_obj_key(self, path, md5=False, ignore_prefix=False, prefix=None):
         """Get file object key"""
         if ignore_prefix is True or self.ignore_prefix:
             key = path
         else:
-            key = os.path.join(self._prefix, os.path.basename(path))
+            prefix = prefix or self._default_prefix or ""
+            key = os.path.join(prefix, os.path.basename(path))
         if md5 is True:
             key = key + self.hash_checksum
         return key
@@ -114,7 +115,7 @@ class _AWS(object):
         LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
         return response
 
-    def upload_files(self, path, add_checksum=False, progress=False, encryption_key=None):
+    def upload_files(self, path, add_checksum=False, progress=False, encryption_key=None, prefix=None):
         """Upload files"""
 
         def get_files():
@@ -124,7 +125,7 @@ class _AWS(object):
 
         for item in get_files():
             itemname = os.path.basename(item)
-            key = self.get_obj_key(itemname)
+            key = self.get_obj_key(itemname, prefix=prefix)
             progress_callback = ProgressPercentage(item, humanized=self._humanized) if progress else lambda x: None
             extra_args = {} if self._encrypt is False else self._get_extra_args(encryption_key=encryption_key)
 
@@ -207,7 +208,7 @@ class _AWS(object):
 
     def list_files(self):
         """List files"""
-        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=self._prefix)
+        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=self._default_prefix)
         if 'Contents' in resp:
             for el in resp['Contents']:
                 yield {'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']}
