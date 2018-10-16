@@ -174,10 +174,10 @@ class _AWS(object):
         )
         return response['ContentLength']
 
-    def check_if_key_exists(self, key, ignore_prefix=False):
+    def check_if_key_exists(self, key):
         """See if file/key exists"""
         LOG.info('checking {}'.format(key))
-        key = self.get_obj_key(key, ignore_prefix=ignore_prefix)
+        key = self.get_obj_key(key)
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return 'Contents' in resp
 
@@ -216,7 +216,7 @@ class _AWS(object):
     def delete_file(self, path, ignore_prefix=False):
         """Delete file object"""
         path = path if ignore_prefix is True else self.get_obj_key(path)
-        if self.check_if_key_exists(path, ignore_prefix=ignore_prefix):
+        if self.check_if_key_exists(path):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
         raise KeyError('{} does not exist!'.format(path))
