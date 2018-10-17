@@ -165,23 +165,23 @@ class _AWS(object):
             self.client.copy(copy_source, self._bucket, new_prefix, ExtraArgs=extra)
             self.delete_file(old_prefix, ignore_prefix=True)
 
-    def get_object_size(self, path, encryption_key=None, ignore_prefix=False):
+    def get_object_size(self, path, encryption_key=None, ignore_prefix=False, prefix=None):
         """Get object size"""
         response = self.client.head_object(
             Bucket=self._bucket,
-            Key=self.get_obj_key(path, ignore_prefix=ignore_prefix),
+            Key=self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix),
             **self._get_extra_args(encryption_key)
         )
         return response['ContentLength']
 
-    def check_if_key_exists(self, key, ignore_prefix=False):
+    def check_if_key_exists(self, key, ignore_prefix=False, prefix=None):
         """See if file/key exists"""
         LOG.info('checking {}'.format(key))
-        key = self.get_obj_key(key, ignore_prefix=ignore_prefix)
+        key = self.get_obj_key(key, ignore_prefix=ignore_prefix, prefix=prefix)
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return 'Contents' in resp
 
-    def download_file(self, path, dst='.', progress=False, use_encryption=None, encryption_key=None, ignore_prefix=False):
+    def download_file(self, path, dst='.', progress=False, use_encryption=None, encryption_key=None, ignore_prefix=False, prefix=None):
         """Download a file"""
         dst = dst or '.'
         if os.path.isdir(dst):
@@ -189,13 +189,13 @@ class _AWS(object):
         else:
             local = dst
         touch(local)
-        key = self.get_obj_key(path, ignore_prefix=ignore_prefix)
+        key = self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
         progress_callback = ProgressPercentage(
             local, size=self.get_object_size(key, encryption_key=encryption_key), humanized=self._humanized
         ) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args(encryption_key=encryption_key)
 
-        if self.check_if_key_exists(key, ignore_prefix=ignore_prefix):
+        if self.check_if_key_exists(key, ignore_prefix=ignore_prefix, prefix=prefix):
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
                     response = transfer.download_file(
@@ -213,14 +213,14 @@ class _AWS(object):
             for el in resp['Contents']:
                 yield {'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']}
 
-    def delete_file(self, path, ignore_prefix=False):
+    def delete_file(self, path, ignore_prefix=False, prefix=None):
         """Delete file object"""
-        path = self.get_obj_key(path, ignore_prefix=ignore_prefix)
-        if self.check_if_key_exists(path, ignore_prefix=ignore_prefix):
+        path = self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
+        if self.check_if_key_exists(path, ignore_prefix=ignore_prefix, prefix=prefix):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
         raise KeyError('{} does not exist!'.format(path))
 
-    def get_status(self, path, ingore_prefix=False):
+    def get_status(self, path):
         """Get status from tag data"""
         return self.client.get_object_tagging(Bucket=self._bucket, Key=path)
