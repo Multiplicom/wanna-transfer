@@ -106,10 +106,10 @@ class _AWS(object):
         """Calculate control sum"""
         return md5sum(path)
 
-    def upload_checksum(self, path):
+    def upload_checksum(self, path, ignore_prefix=False):
         """Upload control sum for the given file"""
         LOG.debug('uploading checksum for: %s', path)
-        key = self.get_obj_key(path, md5=True) if not self.ignore_prefix else path
+        key = self.get_obj_key(path, md5=True, ignore_prefix=ignore_prefix)
         checksum = self.get_checksum(path)
         response = self.client.put_object(Bucket=self._bucket, Key=key, Body=checksum)
         LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
@@ -165,11 +165,11 @@ class _AWS(object):
             self.client.copy(copy_source, self._bucket, new_prefix, ExtraArgs=extra)
             self.delete_file(old_prefix, ignore_prefix=True)
 
-    def get_object_size(self, path, encryption_key=None):
+    def get_object_size(self, path, encryption_key=None, ignore_prefix=False):
         """Get object size"""
         response = self.client.head_object(
             Bucket=self._bucket,
-            Key=self.get_obj_key(path),
+            Key=self.get_obj_key(path, ignore_prefix=ignore_prefix),
             **self._get_extra_args(encryption_key)
         )
         return response['ContentLength']
@@ -181,7 +181,7 @@ class _AWS(object):
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return 'Contents' in resp
 
-    def download_file(self, path, dst='.', progress=False, use_encryption=None, encryption_key=None):
+    def download_file(self, path, dst='.', progress=False, use_encryption=None, encryption_key=None, ignore_prefix=False):
         """Download a file"""
         dst = dst or '.'
         if os.path.isdir(dst):
@@ -189,13 +189,13 @@ class _AWS(object):
         else:
             local = dst
         touch(local)
-        key = self.get_obj_key(path)
+        key = self.get_obj_key(path, ignore_prefix=ignore_prefix)
         progress_callback = ProgressPercentage(
             local, size=self.get_object_size(key, encryption_key=encryption_key), humanized=self._humanized
         ) if progress else lambda x: None
         extra_args = {} if use_encryption is False else self._get_extra_args(encryption_key=encryption_key)
 
-        if self.check_if_key_exists(key):
+        if self.check_if_key_exists(key, ignore_prefix=ignore_prefix):
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
                     response = transfer.download_file(
@@ -215,7 +215,7 @@ class _AWS(object):
 
     def delete_file(self, path, ignore_prefix=False):
         """Delete file object"""
-        path = path if ignore_prefix is True else self.get_obj_key(path)
+        path = self.get_obj_key(path, ignore_prefix=ignore_prefix)
         if self.check_if_key_exists(path, ignore_prefix=ignore_prefix):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
