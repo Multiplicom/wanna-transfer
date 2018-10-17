@@ -106,16 +106,16 @@ class _AWS(object):
         """Calculate control sum"""
         return md5sum(path)
 
-    def upload_checksum(self, path, ignore_prefix=False):
+    def upload_checksum(self, path, ignore_prefix=False, prefix=None):
         """Upload control sum for the given file"""
         LOG.debug('uploading checksum for: %s', path)
-        key = self.get_obj_key(path, md5=True, ignore_prefix=ignore_prefix)
+        key = self.get_obj_key(path, md5=True, ignore_prefix=ignore_prefix, prefix=prefix)
         checksum = self.get_checksum(path)
         response = self.client.put_object(Bucket=self._bucket, Key=key, Body=checksum)
         LOG.info('checksum ({}): {}'.format(self.hash_checksum, checksum))
         return response
 
-    def upload_files(self, path, add_checksum=False, progress=False, encryption_key=None, prefix=None):
+    def upload_files(self, path, add_checksum=False, progress=False, encryption_key=None, ignore_prefix=False, prefix=None):
         """Upload files"""
 
         def get_files():
@@ -125,7 +125,7 @@ class _AWS(object):
 
         for item in get_files():
             itemname = os.path.basename(item)
-            key = self.get_obj_key(itemname, prefix=prefix)
+            key = self.get_obj_key(itemname, ignore_prefix=ignore_prefix, prefix=prefix)
             progress_callback = ProgressPercentage(item, humanized=self._humanized) if progress else lambda x: None
             extra_args = {} if self._encrypt is False else self._get_extra_args(encryption_key=encryption_key)
 
@@ -135,7 +135,7 @@ class _AWS(object):
                     transfer.upload_file(item, self._bucket, key, extra_args=extra_args, callback=progress_callback)
             print('')
             if add_checksum:
-                self.upload_checksum(item)
+                self.upload_checksum(item, ignore_prefix=ignore_prefix, prefix=prefix)
 
     def search(self, term):
         """Fuzzy search for the object(s) using given term"""
