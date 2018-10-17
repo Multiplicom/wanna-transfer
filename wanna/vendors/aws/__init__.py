@@ -206,9 +206,9 @@ class _AWS(object):
             raise KeyError('{} does not exist!'.format(path))
         return response
 
-    def list_files(self):
+    def list_files(self, prefix=None):
         """List files"""
-        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=self._default_prefix)
+        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=prefix or self._default_prefix)
         if 'Contents' in resp:
             for el in resp['Contents']:
                 yield {'date': el['LastModified'], 'size': el['Size'], 'name': el['Key']}
