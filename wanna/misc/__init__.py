@@ -1,6 +1,6 @@
-
 def setup_vendor(vendor, **kwargs):
     from wanna import setup_vendor
+
     return setup_vendor(vendor, **kwargs)
 
 

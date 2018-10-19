@@ -20,9 +20,19 @@ class IntegrityError(Exception):
 
 
 def download_file(
-        path, vendor, dst='.', bucket=None,
-        use_encryption=True, add_checksum=False, progress=False, ignore_prefix=False,
-        encryption_key=None, humanized=False, **kwargs):
+    path,
+    vendor,
+    dst=".",
+    bucket=None,
+    use_encryption=True,
+    add_checksum=False,
+    progress=False,
+    ignore_prefix=False,
+    encryption_key=None,
+    humanized=False,
+    **kwargs
+):
+
     """Download file from the cloud.
 
     Args:
@@ -37,7 +47,14 @@ def download_file(
     Returns:
         obj - confirmation(s) from the vendor
     """
-    vendor = setup_vendor(vendor, bucket=bucket, use_encryption=use_encryption, ignore_prefix=ignore_prefix, humanized=humanized)
+
+    vendor = setup_vendor(
+        vendor,
+        bucket=bucket,
+        use_encryption=use_encryption,
+        ignore_prefix=ignore_prefix,
+        humanized=humanized,
+    )
 
     if add_checksum:
         chck_path = path + vendor.hash_checksum
@@ -46,15 +63,15 @@ def download_file(
     resp = vendor.download_file(path, dst=dst, progress=progress)
 
     if add_checksum:
-        with open(chck_path, 'rb') as chck_file:
+        with open(chck_path, "rb") as chck_file:
             control1 = chck_file.read().strip()
         control2 = vendor.get_checksum(path)
 
         if control1 != control2:
-            error = 'File corrupted!\n'
-            error += ''.join(difflib.unified_diff(control2, control1))
+            error = "File corrupted!\n"
+            error += "".join(difflib.unified_diff(control2, control1))
             raise IntegrityError(error)
         else:
-            LOG.info('\nIntegrity check: OK')
+            LOG.info("\nIntegrity check: OK")
 
     return resp
