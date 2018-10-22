@@ -2,6 +2,8 @@ An efficient transfer to the cloud
 ----------------------------------
 [![Build Status](https://travis-ci.org/Multiplicom/wanna-transfer.svg?branch=master)](https://travis-ci.org/Multiplicom/wanna-transfer)
 [![PyPI version](https://badge.fury.io/py/wanna-transfer.svg)](https://badge.fury.io/py/wanna-transfer)
+[![Maintainability](https://api.codeclimate.com/v1/badges/04b6db49155397d49c5d/maintainability)](https://codeclimate.com/github/piotrpawlaczek/wanna-transfer/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/04b6db49155397d49c5d/test_coverage)](https://codeclimate.com/github/piotrpawlaczek/wanna-transfer/test_coverage)
 
 The main goal of this tool is to provide efficient and reliable upload/download
 for large ( >5GB) files to and from the cloud.
