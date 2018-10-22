@@ -253,7 +253,10 @@ class _AWS(object):
 
     def list_files(self, prefix=None):
         """List files"""
-        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=prefix or self._default_prefix)
+        if self.ignore_prefix:
+            resp = self.client.list_objects_v2(Bucket=self._bucket)
+        else:
+            resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=prefix or self._default_prefix)
         if "Contents" in resp:
             for el in resp["Contents"]:
                 yield {
