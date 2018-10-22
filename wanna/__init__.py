@@ -1,7 +1,6 @@
 from wanna.vendors.aws import _AWS
 
-__version__ = "0.1.9-beta4"
-
+__version__ = '0.1.9'
 
 ALIASES = {
     "s3": _AWS,

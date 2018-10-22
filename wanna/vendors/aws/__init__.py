@@ -97,7 +97,7 @@ class _AWS(object):
             args.update(
                 {
                     "SSECustomerAlgorithm": self.config.ENCRYPTION_ALGORITHM,
-                    "SSECustomerKey": self.config.ENCRYPTION_KEY,
+                    "SSECustomerKey": self.get_encryption_key(encryption_key),
                 }
             )
         return args
@@ -118,17 +118,17 @@ class _AWS(object):
         """Calculate control sum"""
         return md5sum(path)
 
-    def upload_checksum(self, path):
+    def upload_checksum(self, path, ignore_prefix=False, prefix=None):
         """Upload control sum for the given file"""
-        LOG.debug("uploading checksum for: %s", path)
-        key = self.get_obj_key(path, md5=True) if not self.ignore_prefix else path
+        LOG.debug('uploading checksum for: %s', path)
+        key = self.get_obj_key(path, md5=True, ignore_prefix=ignore_prefix, prefix=prefix)
         checksum = self.get_checksum(path)
         response = self.client.put_object(Bucket=self._bucket, Key=key, Body=checksum)
         LOG.info("checksum ({}): {}".format(self.hash_checksum, checksum))
         return response
 
     def upload_files(
-        self, path, add_checksum=False, progress=False, encryption_key=None, prefix=None
+        self, path, add_checksum=False, progress=False, encryption_key=None, ignore_prefix=False, prefix=None
     ):
         """Upload files"""
 
@@ -139,7 +139,7 @@ class _AWS(object):
 
         for item in get_files():
             itemname = os.path.basename(item)
-            key = self.get_obj_key(itemname, prefix=prefix)
+            key = self.get_obj_key(itemname, ignore_prefix=ignore_prefix, prefix=prefix)
             progress_callback = (
                 ProgressPercentage(item, humanized=self._humanized)
                 if progress
@@ -163,7 +163,7 @@ class _AWS(object):
                     )
             print("")
             if add_checksum:
-                self.upload_checksum(item)
+                self.upload_checksum(item, ignore_prefix=ignore_prefix, prefix=prefix)
 
     def search(self, term):
         """Fuzzy search for the object(s) using given term"""
@@ -193,24 +193,24 @@ class _AWS(object):
             self.client.copy(copy_source, self._bucket, new_prefix, ExtraArgs=extra)
             self.delete_file(old_prefix, ignore_prefix=True)
 
-    def get_object_size(self, path, encryption_key=None):
+    def get_object_size(self, path, encryption_key=None, ignore_prefix=False, prefix=None):
         """Get object size"""
         response = self.client.head_object(
             Bucket=self._bucket,
-            Key=self.get_obj_key(path),
+            Key=self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix),
             **self._get_extra_args(encryption_key)
         )
         return response["ContentLength"]
 
-    def check_if_key_exists(self, key):
+    def check_if_key_exists(self, key, ignore_prefix=False, prefix=None):
         """See if file/key exists"""
-        LOG.info("checking {}".format(key))
-        key = self.get_obj_key(key)
+        LOG.info('checking {}'.format(key))
+        key = self.get_obj_key(key, ignore_prefix=ignore_prefix, prefix=prefix)
         resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=key)
         return "Contents" in resp
 
     def download_file(
-        self, path, dst=".", progress=False, use_encryption=None, encryption_key=None
+        self, path, dst=".", progress=False, use_encryption=None, encryption_key=None, ignore_prefix=False, prefix=None
     ):
         """Download a file"""
         dst = dst or "."
@@ -219,7 +219,7 @@ class _AWS(object):
         else:
             local = dst
         touch(local)
-        key = self.get_obj_key(path)
+        key = self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
 
         progress_callback = (
             ProgressPercentage(
@@ -236,7 +236,7 @@ class _AWS(object):
             else self._get_extra_args(encryption_key=encryption_key)
         )
 
-        if self.check_if_key_exists(key):
+        if self.check_if_key_exists(key, ignore_prefix=ignore_prefix, prefix=prefix):
             with ignore_ctrl_c():
                 with self._transfer(self.client) as transfer:
                     response = transfer.download_file(
@@ -251,9 +251,9 @@ class _AWS(object):
             raise KeyError("{} does not exist!".format(path))
         return response
 
-    def list_files(self):
+    def list_files(self, prefix=None):
         """List files"""
-        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=self._prefix)
+        resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=prefix or self._default_prefix)
         if "Contents" in resp:
             for el in resp["Contents"]:
                 yield {
@@ -262,14 +262,14 @@ class _AWS(object):
                     "name": el["Key"],
                 }
 
-    def delete_file(self, path, ignore_prefix=False):
+    def delete_file(self, path, ignore_prefix=False, prefix=None):
         """Delete file object"""
-        path = path if ignore_prefix is True else self.get_obj_key(path)
-        if self.check_if_key_exists(path):
+        path = self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
+        if self.check_if_key_exists(path, ignore_prefix=ignore_prefix, prefix=prefix):
             with ignore_ctrl_c():
                 return self.client.delete_object(Bucket=self._bucket, Key=path)
         raise KeyError("{} does not exist!".format(path))
 
-    def get_status(self, path, ingore_prefix=False):
+    def get_status(self, path):
         """Get status from tag data"""
         return self.client.get_object_tagging(Bucket=self._bucket, Key=path)
