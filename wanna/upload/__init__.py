@@ -18,6 +18,7 @@ def upload_files(
     progress=False,
     prefix=None,
     ignore_prefix=False,
+    profile=None
 ):
 
     """Uploads file to the cloud.
