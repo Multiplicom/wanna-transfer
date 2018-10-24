@@ -18,6 +18,7 @@ def upload_files(
     progress=False,
     prefix=None,
     ignore_prefix=False,
+    humanized=False,
     profile=None
 ):
 
@@ -40,6 +41,8 @@ def upload_files(
         bucket=bucket,
         use_encryption=use_encryption,
         ignore_prefix=ignore_prefix,
+        humanized=humanized,
+        profile=profile
     )
 
     vendor.upload_files(path, add_checksum=add_checksum, progress=progress)
