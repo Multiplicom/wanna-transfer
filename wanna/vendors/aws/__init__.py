@@ -224,7 +224,7 @@ class _AWS(object):
         progress_callback = (
             ProgressPercentage(
                 local,
-                size=self.get_object_size(key, encryption_key=encryption_key),
+                size=self.get_object_size(key, encryption_key=encryption_key, ignore_prefix=ignore_prefix),
                 humanized=self._humanized,
             )
             if progress
