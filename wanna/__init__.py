@@ -1,10 +1,12 @@
 from wanna.vendors.aws import _AWS
+from wanna.vendors.minio import MINIO
 
-__version__ = '0.1.9'
+__version__ = '0.2.0-alpha1'
 
 ALIASES = {
     "s3": _AWS,
     "aws": _AWS,
+    "minio": MINIO,
     "softlayer": NotImplementedError,
     "azure": NotImplementedError,
     "googlecloud": NotImplementedError,
@@ -24,7 +26,7 @@ def setup_vendor(
     try:
         vendor = ALIASES[vendor]
     except KeyError:
-        raise ValueError("datacenter: {}, is not supported".format(vendor))
+        raise ValueError("datacenter: {}, is not supported".format(vendor_str.lower()))
     return vendor(
         bucket=bucket,
         use_encryption=use_encryption,

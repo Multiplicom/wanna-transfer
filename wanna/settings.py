@@ -26,12 +26,12 @@ class Config(object):
         )
         self.UPLOAD_PREFIX = config.get("default", "upload_prefix", fallback="not-set")
         self.BUCKET = config.get("default", "bucket", fallback=self.BUCKET)
+        print "<Config: " + repr(DATACENTERS[vendor.name.lower()]) + ">"
         self.VENDOR = DATACENTERS[vendor.name.lower()](config, profile)
 
         ignore_prefix = config.get("default", "ignore_prefix", fallback=False)
 
         self.IGNORE_PREFIX = True if ignore_prefix == "true" else False
-
 
 class AWS(object):
     """Aws specific settings"""
@@ -44,8 +44,16 @@ class AWS(object):
             profile if profile else "aws", "aws_secret_access_key", fallback="missing"
         )
 
+class MINIO(object):
+    def __init__(self, config, *args, **kwargs):
+        self.ENDPOINT_URL = config.get("minio", "endpoint_url")
+        self.API_KEY = config.get("minio", "minio_access_key")
+        self.API_SECRET = config.get("minio", "minio_secret_key")
+
+
 
 DATACENTERS = {
+    "minio": MINIO,
     "aws": AWS,
     "softlayer": NotImplementedError,
     "azure": NotImplementedError,
