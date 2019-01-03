@@ -44,12 +44,19 @@ class AWS(object):
         self.API_SECRET = cfg.get(section, "aws_secret_access_key", fallback="missing")
 
 class MINIO(object):
+    """Minio
+    
+    ENDPOINT_URL -- the endpoint on which Minio is hosted
+    MINIO_ACCESS_KEY -- access key (comparable with aws_access_key_id)
+    MINIO_SECRET_KEY -- secret key (comparable with aws_secret_access_id)
+    ROOT_CA_BUNDLE -- a pem file bundle with root CA cert and self-signed cert
+    """
     def __init__(self, config, *args, **kwargs):
+        # ignore profile for now
         self.ENDPOINT_URL = config.get("minio", "endpoint_url")
         self.API_KEY = config.get("minio", "minio_access_key")
         self.API_SECRET = config.get("minio", "minio_secret_key")
-
-
+        self.ROOT_CA_BUNDLE = config.get("minio", "root_ca_bundle")
 
 DATACENTERS = {
     "minio": MINIO,

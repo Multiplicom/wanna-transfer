@@ -1,12 +1,15 @@
 from wanna.vendors.aws import _AWS
 from botocore.client import Config as BotoConfig
-
 from wanna.settings import Config
-
+from os import environ
 
 class MINIO(_AWS):
-    def __init__(self, **kwargs):
-        super(MINIO, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        self.profile = None
+        if self.program_config.VENDOR.ROOT_CA_BUNDLE:
+            environ["REQUESTS_CA_BUNDLE"] = self.program_config.VENDOR.ROOT_CA_BUNDLE
+
+        super(MINIO, self).__init__(*args, **kwargs)
 
     @property
     def service(self):

@@ -86,7 +86,7 @@ class _AWS(object):
             except ValueError as error:
                 LOG.warning("{}, enc key: {}".format(error, key))
                 return key
-        return self.self.config.ENCRYPTION_KEY
+        return self.program_config.ENCRYPTION_KEY
 
     def _ignore_prefix(self):
         LOG.debug("ignore prefix mode")
@@ -96,10 +96,10 @@ class _AWS(object):
         """Extra parameters"""
         args = {}
         if self._encrypt:
-            LOG.info("using encryption: {}".format(self.self.config.ENCRYPTION_ALGORITHM))
+            LOG.info("using encryption: {}".format(self.program_config.ENCRYPTION_ALGORITHM))
             args.update(
                 {
-                    "SSECustomerAlgorithm": self.self.config.ENCRYPTION_ALGORITHM,
+                    "SSECustomerAlgorithm": self.program_config.ENCRYPTION_ALGORITHM,
                     "SSECustomerKey": self.get_encryption_key(encryption_key),
                 }
             )
@@ -186,7 +186,7 @@ class _AWS(object):
         if self._encrypt:
             extra.update(
                 dict(
-                    CopySourceSSECustomerAlgorithm=self.self.config.ENCRYPTION_ALGORITHM,
+                    CopySourceSSECustomerAlgorithm=self.program_config.ENCRYPTION_ALGORITHM,
                     CopySourceSSECustomerKey=self.get_encryption_key(encryption_key),
                 )
             )
