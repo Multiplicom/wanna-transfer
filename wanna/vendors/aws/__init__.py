@@ -44,10 +44,14 @@ class _AWS(object):
     def name(self):
         return "aws"
 
-    def _get_config(self, config):
+    @property
+    def program_config(self):
+        return Config(vendor=self.name, profile=self.profile)
+
+    def _get_boto_config(self):
         return {
-            "aws_access_key_id": config.VENDOR.API_KEY,
-            "aws_secret_access_key": config.VENDOR.API_SECRET,
+            "aws_access_key_id": self.program_config.VENDOR.API_KEY,
+            "aws_secret_access_key": self.program_config.VENDOR.API_SECRET,
             "config": BotoConfig(
                 signature_version=self.signature_version, region_name=self.region_name
             ),
@@ -61,16 +65,15 @@ class _AWS(object):
         humanized=False,
         profile=None,
     ):
-        config = Config(self, profile=profile)
-        self._bucket = config.BUCKET if not bucket else bucket
-        self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
+        self.profile = profile
+        self._bucket = self.program_config.BUCKET if not bucket else bucket
+        self._default_prefix = os.path.join(self.program_config.UPLOAD_PREFIX, self.program_config.PARTNER_NAME)
         self._encrypt = use_encryption
-        self.client = boto3.client(self.service, **self._get_config(config))
-        self.resource = boto3.resource("s3", **self._get_config(config))
+        self.client = boto3.client(self.service, **self._get_boto_config())
+        self.resource = boto3.resource("s3", **self._get_boto_config())
         self._transfer = S3Transfer
         self._checksum = None
-        self.ignore_prefix = ignore_prefix or config.IGNORE_PREFIX
-        self.config = config
+        self.ignore_prefix = ignore_prefix or self.program_config.IGNORE_PREFIX
         self._humanized = humanized
 
         if self.ignore_prefix:
@@ -83,7 +86,7 @@ class _AWS(object):
             except ValueError as error:
                 LOG.warning("{}, enc key: {}".format(error, key))
                 return key
-        return self.config.ENCRYPTION_KEY
+        return self.self.config.ENCRYPTION_KEY
 
     def _ignore_prefix(self):
         LOG.debug("ignore prefix mode")
@@ -93,10 +96,10 @@ class _AWS(object):
         """Extra parameters"""
         args = {}
         if self._encrypt:
-            LOG.info("using encryption: {}".format(self.config.ENCRYPTION_ALGORITHM))
+            LOG.info("using encryption: {}".format(self.self.config.ENCRYPTION_ALGORITHM))
             args.update(
                 {
-                    "SSECustomerAlgorithm": self.config.ENCRYPTION_ALGORITHM,
+                    "SSECustomerAlgorithm": self.self.config.ENCRYPTION_ALGORITHM,
                     "SSECustomerKey": self.get_encryption_key(encryption_key),
                 }
             )
@@ -183,7 +186,7 @@ class _AWS(object):
         if self._encrypt:
             extra.update(
                 dict(
-                    CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
+                    CopySourceSSECustomerAlgorithm=self.self.config.ENCRYPTION_ALGORITHM,
                     CopySourceSSECustomerKey=self.get_encryption_key(encryption_key),
                 )
             )

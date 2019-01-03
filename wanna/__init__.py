@@ -1,3 +1,5 @@
+from wanna.settings import Config
+
 from wanna.vendors.aws import _AWS
 from wanna.vendors.minio import MINIO
 
@@ -12,6 +14,7 @@ ALIASES = {
     "googlecloud": NotImplementedError,
 }
 
+config = Config()
 
 def setup_vendor(
     vendor_str,
@@ -22,7 +25,7 @@ def setup_vendor(
     **other
 ):
     """Setup vendor from the given string and params"""
-    vendor = vendor_str.lower()
+    vendor = vendor_str.lower() if vendor_str else config.PROVIDER 
     try:
         vendor = ALIASES[vendor]
     except KeyError:
@@ -41,7 +44,7 @@ def Transfer(
 ):
     """A proxy to vendor"""
     return setup_vendor(
-        vendor,
+        vendor.lower() if vendor else config.PROVIDER,
         bucket=bucket,
         use_encryption=use_encrpytion,
         ignore_prefix=ignore_prefix,
