@@ -28,7 +28,7 @@ Options:
   --no-encrypt   Do not encrypt at rest.
   --no-decrypt   Do not decrypt in transit.
   --ignore-prefix  Ignore all prefixes
-  --profile=<name>  Use a named profile [default: aws]
+  --profile=<name>  Use a named profile
   --datacenter=<name>  Cloud provider [default: aws]
   --bucket=<name>  Bucket name [default: credentials]
 """
