@@ -5,49 +5,64 @@ Settings and defaults
 import os
 import configparser
 
+from functools import partial
+
+DEFAULT_SECTION = 'default'
 
 class Config(object):
     """Shared settings"""
-
-    PARTNER_NAME = "partner"
-    ENCRYPTION_ALGORITHM = "AES256"
-    UPLOAD_PREFIX = "in"
-    BUCKET = "mtp-cloudstorage"
-    IGNORE_PREFIX = False
-
-    def __init__(self, vendor, profile=None):
+    def __init__(self, profile=None, vendor=None, path="~/.wanna/credentials"):
         config = configparser.ConfigParser()
+        config.default_section = DEFAULT_SECTION
+        config.read(os.path.expanduser(path))
+        self.validate(config)
 
-        config.read(os.path.expanduser("~/.wanna/credentials"))
+        self.PROVIDER = (vendor if vendor else config.get("default", "provider", fallback="aws")).lower()
+        
+        section = "{}:{}".format(self.PROVIDER, profile) if profile else self.PROVIDER
+        get = partial(config.get, section)
+        get_boolean = partial(config.getboolean, section)
+        
+        self.ENCRYPTION_KEY = bytes(bytearray.fromhex(get("encryption_key", fallback="0000")))
+        self.PARTNER_NAME = get("partner", fallback="partner")
+        self.BUCKET = get("bucket", fallback="mtp-cloudstorage")
+        self.UPLOAD_PREFIX = get("upload_prefix", fallback="in")
+        self.IGNORE_PREFIX = get_boolean("ignore_prefix", fallback=False)
+        self.VENDOR = DATACENTERS[self.PROVIDER](get)
 
-        self.PARTNER_NAME = config.get("default", "partner", fallback=self.PARTNER_NAME)
-        self.ENCRYPTION_KEY = bytes(
-            bytearray.fromhex(config.get("default", "encryption_key", fallback="0000"))
-        )
-        self.UPLOAD_PREFIX = config.get("default", "upload_prefix", fallback="not-set")
-        self.BUCKET = config.get("default", "bucket", fallback=self.BUCKET)
-        self.VENDOR = DATACENTERS[vendor.name.lower()](config, profile)
-
-        ignore_prefix = config.get("default", "ignore_prefix", fallback=False)
-
-        self.IGNORE_PREFIX = True if ignore_prefix == "true" else False
-
+    def validate(self, config):
+        vendors_with_settings = set(vendor.split(":")[0] for vendor in config.sections())
+        for vendor in vendors_with_settings:
+            if vendor not in DATACENTERS.keys():
+                raise ValueError("Unsupported vendor '{}'".format(vendor))
 
 class AWS(object):
     """Aws specific settings"""
 
-    def __init__(self, cfg, profile=None):
-        self.API_KEY = cfg.get(
-            profile if profile else "aws", "aws_access_key_id", fallback="missing"
-        )
-        self.API_SECRET = cfg.get(
-            profile if profile else "aws", "aws_secret_access_key", fallback="missing"
-        )
+    def __init__(self, get):
+        self.API_KEY = get("aws_access_key_id")
+        self.API_SECRET = get("aws_secret_access_key")
 
+
+class MINIO(object):
+    """Minio
+    
+    endpoint_url -- the endpoint on which Minio is hosted
+    root_ca_bundle -- a pem file bundle with root CA cert and self-signed cert (optional)
+    minio_access_key -- access key (comparable with aws_access_key_id)
+    minio_secret_key -- secret key (comparable with aws_secret_access_id)
+    """
+    def __init__(self, get):
+        # ignore profile for now
+        self.ENDPOINT_URL = get("endpoint_url")
+        self.ROOT_CA_BUNDLE = get("root_ca_bundle", fallback=None)
+        self.API_KEY = get("minio_access_key")
+        self.API_SECRET = get("minio_secret_key")
 
 DATACENTERS = {
     "aws": AWS,
-    "softlayer": NotImplementedError,
-    "azure": NotImplementedError,
-    "googlecloud": NotImplementedError,
+    "minio": MINIO,
+    # "softlayer": NotImplementedError,
+    # "azure": NotImplementedError,
+    # "googlecloud": NotImplementedError,
 }
