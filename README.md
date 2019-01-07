@@ -68,6 +68,15 @@ encryption_key = dev-encryption-key
 ```
 _Example credentials file_
 
+Supported Providers
+---
+| | Settings |
+|----|-----|
+| **aws** | `aws_access_key_id` (mandatory)<br>`aws_secret_access_key` (mandatory) | 
+| **minio** | `minio_access_key` (mandatory)<br>`minio_secret_key` (mandatory)<br>`root_ca_bundle` (optional)<br>`endpoint_url` (mandatory)
+
+
+
 Usage
 -----
 from the command line:
