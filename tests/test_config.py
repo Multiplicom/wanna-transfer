@@ -159,7 +159,7 @@ def test_vendor_override_for_default_provider(config_file):
     bucket = bar
 
     [minio]
-    provider = aws
+    provider = "aws
     endpoint_url = foo-spam
     minio_access_key = foo-mak
     minio_secret_key = foo-msk

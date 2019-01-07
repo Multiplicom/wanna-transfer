@@ -32,34 +32,46 @@ Installation
 ```cmd
 >> pip install wanna-transfer
 ```
-Create a configuration file under ~/.wanna/credentials
 
-> ⚠️ wanna-transfer will use the profile **aws** if no profile is selected either from the CLI or in the API.
+Configuration
+-------------
 
-Example:
+Create a configuration file under `~/.wanna/credentials`.
+
+Unless specified otherwise, wanna will use the **S3** provider using the access credentials in the nameless profile for that provider—i.e. under `[aws]`. The default provider can be toggled by setting the provider under `[default]` to any of the supported providers.
+
+Wanna supports using _any_ of the multiple named profiles that are stored in the credentials file. You can configure additional profiles by adding sections to the credentials file like shown in the example below.
+
+Settings can be shared between profiles using the `[default]` section. These values can be overwritten in the profile settings (either named or nameless).
+
 
 ```ini
 [default]
-encryption_key = your_encryption_key
+encryption_key = default-encryption_key
 partner = partner-name
 bucket = your-space
 upload_prefix = in
 
-# this is the default profile
+# Default access credentials for the default provider. 
 [aws]
 aws_access_key_id = your_key_id
 aws_secret_access_key = your_secret_key
 
-[dev]
-aws_access_key_id = your_key_dev_id
-aws_secret_access_key = your_dev_secret_key
+# Named profile 'dev' for S3.
+# Use with --profile=dev 
+[aws:dev] 
+aws_access_key_id = your-dev-key-id
+aws_secret_access_key = your-dev-secret-key
+# These settings override the defaults:
+bucket = your-dev-space 
+encryption_key = dev-encryption-key
 ```
+_Example credentials file_
 
 Usage
 -----
 from the command line:
 ```
->> wanna -h
 Wanna transfer.
 
 Usage:
@@ -80,11 +92,24 @@ Usage:
   wanna ls [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [-H | --human] [--profile=<name>]
   wanna (-h | --help)
   wanna --version
+
+Options:
+  -h --help      Show this message and exit.
+  -v --verbose   Show more text.
+  --version      Show version and exit.
+  --no-progress  Do not show progress bar.
+  --no-encrypt   Do not encrypt at rest.
+  --no-decrypt   Do not decrypt in transit.
+  --ignore-prefix  Ignore all prefixes
+  --profile=<name>  Use a named profile
+  --datacenter=<name>  Cloud provider [default: aws]
+  --bucket=<name>  Bucket name [default: credentials]
 ```
-or from python:
+
+Or from Python:
 
 ```python
 from wanna import Transfer
 
-Transfer(vendor='aws').upload_files(path)
+Transfer().upload_files(path)
 ```
