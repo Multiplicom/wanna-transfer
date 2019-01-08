@@ -130,6 +130,28 @@ class _AWS(object):
         LOG.info("checksum ({}): {}".format(self.hash_checksum, checksum))
         return response
 
+    def upload_file(self, path, alias=None, prefix=None, encryption_key=None):
+        if not os.path.isfile(path):
+            raise ValueError("{} is not a file", path)
+
+        def get_key():
+            obj_name = alias if alias else os.path.basename(path)
+            return "{}/{}".format(prefix, obj_name) if prefix else obj_name
+
+        with self._transfer(self.client) as transfer:
+            LOG.debug("Uploading '%s' to '%s'", path, get_key())
+            transfer.upload_file(
+                path,
+                self._bucket,
+                get_key(),
+                extra_args=(
+                    {}
+                    if self._encrypt is False
+                    else self._get_extra_args(encryption_key=encryption_key)
+                )
+            )
+        
+
     def upload_files(
         self, path, add_checksum=False, progress=False, encryption_key=None, ignore_prefix=False, prefix=None
     ):
