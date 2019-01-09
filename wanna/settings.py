@@ -11,7 +11,7 @@ DEFAULT_SECTION = 'default'
 
 class Config(object):
     """Shared settings"""
-    def __init__(self, profile=None, vendor=None, path="~/.wanna/credentials"):
+    def __init__(self, profile=None, vendor=None, path=u"~/.wanna/credentials"):
         config = configparser.ConfigParser()
         config.default_section = DEFAULT_SECTION
         config.read(os.path.expanduser(path))
@@ -28,7 +28,9 @@ class Config(object):
         self.BUCKET = get("bucket", fallback="mtp-cloudstorage")
         self.UPLOAD_PREFIX = get("upload_prefix", fallback="in")
         self.IGNORE_PREFIX = get_boolean("ignore_prefix", fallback=False)
+        self.ENCRYPTION_ALGORITHM = get('encryption_algorithm', fallback='AES256')
         self.VENDOR = DATACENTERS[self.PROVIDER](get)
+
 
     def validate(self, config):
         vendors_with_settings = set(vendor.split(":")[0] for vendor in config.sections())
@@ -40,9 +42,8 @@ class AWS(object):
     """Aws specific settings"""
 
     def __init__(self, get):
-        self.API_KEY = get("aws_access_key_id")
-        self.API_SECRET = get("aws_secret_access_key")
-
+        self.API_KEY = get("aws_access_key_id", fallback='missing')
+        self.API_SECRET = get("aws_secret_access_key", fallback='missing')
 
 class MINIO(object):
     """Minio
@@ -60,7 +61,6 @@ class MINIO(object):
         self.API_SECRET = get("minio_secret_key")
 
 DATACENTERS = {
-    "minio": MINIO,
     "aws": AWS,
     "minio": MINIO,
     # "softlayer": NotImplementedError,

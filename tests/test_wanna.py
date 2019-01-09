@@ -1,7 +1,8 @@
 from wanna import Transfer
 from wanna.vendors.aws import _AWS
-from mock import patch
-import configparser
+from wanna.settings import Config
+
+from pytest import fixture
 
 
 def test_aws():
@@ -13,28 +14,44 @@ def test_transfer():
     trf = Transfer()
     assert hasattr(trf, "download_file")
 
+@fixture
+def config_file(tmpdir, scope='function'):
+    def with_content(contents, profile=None, vendor=None):
+        tmpdir.chdir()
+        tmpdir.join("config").write(contents)
+        return Config(path="./config", profile=profile, vendor=vendor)
 
-def test_default_profile():
-    with patch.object(
-        configparser.ConfigParser, "get", return_value="0000"
-    ) as cfg_get_mocked:
-        trf = Transfer()
+    return with_content
 
-        cfg_get_mocked.assert_any_call("aws", "aws_access_key_id", fallback="missing")
-        cfg_get_mocked.assert_any_call(
-            "aws", "aws_secret_access_key", fallback="missing"
-        )
+def test_fallback_settings_absent_configuration(config_file):
+    config = config_file("""""")
 
+    assert config.ENCRYPTION_KEY == bytearray.fromhex('0000')
+    assert config.PARTNER_NAME == 'partner' 
+    assert config.BUCKET == 'mtp-cloudstorage'
+    assert config.UPLOAD_PREFIX == 'in'
+    assert config.IGNORE_PREFIX == False
+    assert config.ENCRYPTION_ALGORITHM == 'AES256'
 
-def test_named_profile():
-    with patch.object(
-        configparser.ConfigParser, "get", return_value="0000"
-    ) as cfg_get_mocked:
-        trf = Transfer(profile="partner")
+def test_default_provider_nameless_profile_fallback_settings(config_file):
+    config = config_file("""
+    [aws]
+    """)
 
-        cfg_get_mocked.assert_any_call(
-            "partner", "aws_access_key_id", fallback="missing"
-        )
-        cfg_get_mocked.assert_any_call(
-            "partner", "aws_secret_access_key", fallback="missing"
-        )
+    assert config.PROVIDER == 'aws'
+    assert config.VENDOR.API_KEY == 'missing'
+    assert config.VENDOR.API_SECRET == 'missing'
+
+def test_named_profile(config_file):
+    config = config_file("""
+    [aws]
+    aws_access_key_id = egg
+    aws_secret_access_key = spam 
+    
+    [aws:partner]
+    """, profile='partner')
+
+    assert config.PROVIDER == 'aws'
+    assert config.VENDOR.API_KEY == 'missing'
+    assert config.VENDOR.API_SECRET == 'missing'
+
