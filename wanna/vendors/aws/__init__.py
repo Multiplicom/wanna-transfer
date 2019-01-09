@@ -61,7 +61,7 @@ class _AWS(object):
         humanized=False,
         profile=None,
     ):
-        LOG.info("profile {}".format(profile))
+        LOG.info("Profile '{}'".format(profile) if profile else "No profile selected")
         config = Config(profile=profile)
         self._bucket = config.BUCKET if not bucket else bucket
         self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
