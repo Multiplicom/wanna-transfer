@@ -65,9 +65,10 @@ class _AWS(object):
         humanized=False,
         profile=None,
     ):
-        self.profile = profile
-        self._bucket = self.program_config.BUCKET if not bucket else bucket
-        self._default_prefix = os.path.join(self.program_config.UPLOAD_PREFIX, self.program_config.PARTNER_NAME)
+        LOG.info("Profile '{}'".format(profile) if profile else "No profile selected")
+        config = Config(profile=profile)
+        self._bucket = config.BUCKET if not bucket else bucket
+        self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
         self.client = boto3.client(self.service, **self._get_boto_config())
         self.resource = boto3.resource("s3", **self._get_boto_config())
