@@ -28,6 +28,11 @@ import logging
 
 LOG = logging.getLogger("wanna:aws")
 
+# Don't mess with the default boto session, especially
+# when changing things like the endpoint or SSL 
+# verification settings.
+session = boto3.session.Session()
+
 
 class _AWS(object):
     """AWS s3 service"""
@@ -68,10 +73,10 @@ class _AWS(object):
         LOG.info("Profile '{}'".format(profile) if profile else "No profile selected")
         self.profile = profile
         self._bucket = self.program_config.BUCKET if not bucket else bucket
-        self._default_prefix = os.path.join(self.program_config.UPLOAD_PREFIX, self.program_config.PARTNER_NAME)
+        self._default_prefix = os.path.join(self.program_config.PARTNER_NAME, self.program_config.UPLOAD_PREFIX)
         self._encrypt = use_encryption
-        self.client = boto3.client(self.service, **self._get_boto_config())
-        self.resource = boto3.resource("s3", **self._get_boto_config())
+        self.client = session.client(self.service, **self._get_boto_config())
+        self.resource = session.resource("s3", **self._get_boto_config())
         self._transfer = S3Transfer
         self._checksum = None
         self.ignore_prefix = ignore_prefix or self.program_config.IGNORE_PREFIX
@@ -282,6 +287,7 @@ class _AWS(object):
         if self.ignore_prefix:
             resp = self.client.list_objects_v2(Bucket=self._bucket)
         else:
+            LOG.info("File listing for prefix '{}/{}'".format(self._bucket, prefix or self._default_prefix))
             resp = self.client.list_objects_v2(Bucket=self._bucket, Prefix=prefix or self._default_prefix)
         if "Contents" in resp:
             for el in resp["Contents"]:
