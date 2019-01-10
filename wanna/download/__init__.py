@@ -54,6 +54,7 @@ def download_file(
         use_encryption=use_encryption,
         ignore_prefix=ignore_prefix,
         humanized=humanized,
+        **kwargs
     )
 
     if add_checksum:

@@ -5,7 +5,6 @@ from os import environ
 
 class MINIO(_AWS):
     def __init__(self, *args, **kwargs):
-        self.profile = None # FIXME
         super(MINIO, self).__init__(*args, **kwargs)
 
     @property

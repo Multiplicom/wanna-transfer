@@ -51,6 +51,8 @@ import random
 import logging
 import binascii
 
+from pygments.console import codes
+
 LOG = logging.getLogger("wanna:cli")
 
 
@@ -118,8 +120,17 @@ def handle_secret(args):
 def handle_download(args):
     kwargs = _handle(args)
     LOG.info("Getting {path}...".format(**kwargs))
-    download_file(**kwargs)
-    print("Download finished!")
+    try:
+        download_file(**kwargs)
+        print("Download finished!")
+    except Exception as error:
+        if 'Forbidden' in error.args[0]:
+            print("{}**Error** File encrypted using different encryption key.".format(
+                codes['darkred'],
+                codes['reset']
+            ))
+        else:
+            raise
 
 
 def handle_delete(args):
