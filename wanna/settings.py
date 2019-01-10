@@ -24,7 +24,7 @@ class Config(object):
         get_boolean = partial(config.getboolean, section)
         
         self.ENCRYPTION_KEY = bytes(bytearray.fromhex(get("encryption_key", fallback="0000")))
-        self.PARTNER_NAME = get("partner", fallback="partner")
+        self.PARTNER_NAME = get("partner", fallback='')
         self.BUCKET = get("bucket", fallback="mtp-cloudstorage")
         self.UPLOAD_PREFIX = get("upload_prefix", fallback="in")
         self.IGNORE_PREFIX = get_boolean("ignore_prefix", fallback=False)
@@ -63,7 +63,4 @@ class MINIO(object):
 DATACENTERS = {
     "aws": AWS,
     "minio": MINIO,
-    # "softlayer": NotImplementedError,
-    # "azure": NotImplementedError,
-    # "googlecloud": NotImplementedError,
 }
