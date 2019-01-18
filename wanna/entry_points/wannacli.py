@@ -11,9 +11,7 @@ Usage:
   wanna delete PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
                     [--profile=<name>]
   wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
-                    [--profile=<name>]
-  wanna fsearch TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
-                    [--profile=<name>]
+                    [--profile=<name>] [--fuzzy]
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
                        [--profile=<name>]
   wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [--profile=<name>]
@@ -71,6 +69,9 @@ def _handle(args):
         new = args["NEW"]
     if args["search"]:
         term = args["TERM"]
+        fuzzy = False
+        if args["--fuzzy"]:
+            fuzzy = True
     vendor = args["--datacenter"]
     ignore_prefix = args["--ignore-prefix"]
 
@@ -107,9 +108,9 @@ def handle_rename(args):
     print("Done!")
 
 
-def handle_search(args, fuzzy=False):
+def handle_search(args):
     kwargs = _handle(args)
-    for el in search_files(fuzzy=fuzzy,**kwargs):
+    for el in search_files(**kwargs):
         print(el)
 
 
@@ -181,9 +182,6 @@ def main():
 
     if args["search"] is True:
         handle_search(args)
-
-    if args["fsearch"] is True:
-        handle_search(args, fuzzy=True)
 
     if args["rename"] is True:
         handle_rename(args)
