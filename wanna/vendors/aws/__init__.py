@@ -14,7 +14,7 @@ from wanna.utils import md5sum
 from wanna.utils import ProgressPercentage
 from wanna.utils import ignore_ctrl_c
 from wanna.utils import touch
-from wanna.utils import fuzzyfinder
+from wanna.utils import finder
 
 from wanna.settings import Config
 
@@ -166,10 +166,10 @@ class _AWS(object):
             if add_checksum:
                 self.upload_checksum(item, ignore_prefix=ignore_prefix, prefix=prefix)
 
-    def search(self, term):
-        """Fuzzy search for the object(s) using given term"""
+    def search(self, term, fuzzy=False):
+        """Identical or Fuzzy search for the object(s) using given term"""
         bucket = self.resource.Bucket(self._bucket)
-        for obj in fuzzyfinder(term, (obj.key for obj in bucket.objects.all())):
+        for obj in finder(term, (obj.key for obj in bucket.objects.all()), fuzzy=fuzzy):
             yield obj
 
     def rename_object(self, old_prefix, new_prefix, encryption_key=None):

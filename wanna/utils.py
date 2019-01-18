@@ -43,12 +43,13 @@ def humanize(value, binary=True, format="%.1f"):
     return (format + " %s") % ((base * bytes / unit), s)
 
 
-def fuzzyfinder(input, collection, accessor=lambda x: x):
+def finder(input, collection, fuzzy=False, accessor=lambda x: x):
     """
     Args:
         input (str): A partial string which is typically entered by a user.
         collection (iterable): A collection of strings which will be filtered
              based on the `input`.
+        fuzzy (bool): perform a fuzzy search (default=False)
 
     Returns:
         suggestions (generator): A generator object that produces a list of
@@ -56,8 +57,10 @@ def fuzzyfinder(input, collection, accessor=lambda x: x):
     """
     suggestions = []
     input = str(input) if not isinstance(input, str) else input
-    pat = ".*?".join(map(re.escape, input))
-    regex = re.compile(pat)
+    pat = input
+    if fuzzy:
+        pat = ".*?".join(map(re.escape, input))
+    regex = re.compile(pat, re.IGNORECASE)
     for item in collection:
         r = regex.search(accessor(item))
         if r:
