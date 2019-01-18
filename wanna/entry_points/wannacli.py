@@ -12,6 +12,8 @@ Usage:
                     [--profile=<name>]
   wanna search TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
                     [--profile=<name>]
+  wanna fsearch TERM [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv]
+                    [--profile=<name>]
   wanna rename OLD NEW [--ignore-prefix] [--datacenter=<aws>] [--no-encrypt]  [--bucket=<credentials>] [-v | -vv]
                        [--profile=<name>]
   wanna status PATH [--ignore-prefix] [--datacenter=<aws>]  [--bucket=<credentials>] [-v | -vv] [--profile=<name>]
@@ -105,9 +107,9 @@ def handle_rename(args):
     print("Done!")
 
 
-def handle_search(args):
+def handle_search(args, fuzzy=False):
     kwargs = _handle(args)
-    for el in search_files(**kwargs):
+    for el in search_files(fuzzy=fuzzy,**kwargs):
         print(el)
 
 
@@ -179,6 +181,9 @@ def main():
 
     if args["search"] is True:
         handle_search(args)
+
+    if args["fsearch"] is True:
+        handle_search(args, fuzzy=True)
 
     if args["rename"] is True:
         handle_rename(args)

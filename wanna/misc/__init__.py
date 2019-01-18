@@ -9,9 +9,9 @@ def delete_file(vendor, path, **kwargs):
     return vendor.delete_file(path)
 
 
-def search_files(vendor, term, **kwargs):
+def search_files(vendor, term, fuzzy=False, **kwargs):
     vendor = setup_vendor(vendor, **kwargs)
-    return vendor.search(term)
+    return vendor.search(term, fuzzy)
 
 
 def rename_file(vendor, old, new, **kwargs):
