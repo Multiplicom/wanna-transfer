@@ -11,6 +11,9 @@ DEFAULT_SECTION = 'default'
 
 class Config(object):
     """Shared settings"""
+
+    ENCRYPTION_ALGORITHM = "AES256"
+
     def __init__(self, profile=None, vendor=None, path="~/.wanna/credentials"):
         config = configparser.ConfigParser()
         config.default_section = DEFAULT_SECTION
