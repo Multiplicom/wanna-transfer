@@ -121,8 +121,36 @@ def handle_secret(args):
 def handle_download(args):
     kwargs = _handle(args)
     LOG.info("Getting {path}...".format(**kwargs))
-    download_file(**kwargs)
-    print("Download finished!")
+    try:
+        download_file(**kwargs)
+        print("Download finished!")
+    except Exception as error:
+        from pygments.console import codes
+
+        if 'Bad Request' in error.args[0]:
+            # Possible causes:
+            # * The object was encrypted using a different method
+            # * The object was not encrypted but the operation tried to decrypt it
+            print("{}Bad Request: Object encryption doesn't match parameters.".format(codes['darkred']))
+            print("Try downloading using --no-decrypt")
+
+        elif 'Forbidden' in error.args[0]:
+            # Possible causes:
+            # * The file was encrypted using a different encryption key
+            # * The bucket or object ACL disallows this operation for the user accessing the object
+            print("{}Forbidden: You don't have the correct permissions to access the requested object.".format(
+                codes['darkred'],
+                codes['reset']
+            ))
+
+        elif 'Not Found' in error.args[0]:
+            LOG.error("Error: {}".format(error))
+            print("{}**Error** File not found.".format(
+                codes['darkred'],
+                codes['reset']
+            ))
+        else:
+            raise
 
 
 def handle_delete(args):
