@@ -17,7 +17,7 @@ class Config(object):
     def __init__(self, profile=None, vendor=None, path="~/.wanna/credentials"):
         config = configparser.ConfigParser()
         config.default_section = DEFAULT_SECTION
-        config.read(os.path.expanduser(path))
+        config.read([os.path.expanduser(path)])
         self.validate(config)
 
         self.PROVIDER = (vendor if vendor else config.get("default", "provider", fallback="aws")).lower()
