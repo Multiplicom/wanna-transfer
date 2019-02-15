@@ -1,6 +1,7 @@
 from wanna.settings import Config
 from unittest import TestCase
 from pytest import fixture, raises
+import six
 
 SAMPLE_CONFIG = """
 [default]
@@ -42,7 +43,7 @@ def test_empty_config_file(config_file):
 def test_defaults_are_set(config_file):
     config = config_file(SAMPLE_CONFIG)
 
-    assert config.ENCRYPTION_KEY == bytes("egg", "utf-8")
+    assert config.ENCRYPTION_KEY == six.b("egg")
     assert config.PARTNER_NAME == "spam"
     assert config.BUCKET == "sausage"
     assert config.UPLOAD_PREFIX == "bacon"
