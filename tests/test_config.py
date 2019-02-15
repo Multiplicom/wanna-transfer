@@ -35,6 +35,9 @@ def config_file(tmpdir, scope='function'):
 
     return with_content
 
+def test_empty_config_file(config_file):
+    with raises(ValueError):
+        config = config_file("") 
 
 def test_defaults_are_set(config_file):
     config = config_file(SAMPLE_CONFIG)

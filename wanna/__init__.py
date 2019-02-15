@@ -35,7 +35,7 @@ def setup_vendor(
 
 
 def Transfer(
-    vendor="aws", bucket=None, use_encrpytion=True, ignore_prefix=False, profile=None
+    vendor="aws", bucket=None, use_encrpytion=True, ignore_prefix=False, profile=None, config=None
 ):
     """A proxy to vendor"""
     return setup_vendor(
@@ -44,4 +44,5 @@ def Transfer(
         use_encryption=use_encrpytion,
         ignore_prefix=ignore_prefix,
         profile=profile,
+        config=config
     )
