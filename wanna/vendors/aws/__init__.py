@@ -28,6 +28,18 @@ import logging
 
 LOG = logging.getLogger("wanna:aws")
 
+class AWSEncryption:
+    #More information: https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingEncryption.html
+
+    #client-side encryption
+    CSE = 'cse'
+
+    #server-side encryption
+    # AWS S3-managed
+    SSES3 = 'sses3'
+
+    TYPES = [CSE, SSES3]
+
 
 class _AWS(object):
     """AWS s3 service"""
@@ -66,6 +78,7 @@ class _AWS(object):
         self._bucket = config.BUCKET if not bucket else bucket
         self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
+        self._encryption_type = AWSEncryption.CSE
         self.client = boto3.client(self.service, **self._get_config(config))
         self.resource = boto3.resource("s3", **self._get_config(config))
         self._transfer = S3Transfer
@@ -93,7 +106,7 @@ class _AWS(object):
     def _get_extra_args(self, encryption_key=None):
         """Extra parameters"""
         args = {}
-        if self._encrypt:
+        if self._encrypt and self._encryption_type != AWSEncryption.SSES3:
             LOG.info("using encryption: {}".format(self.config.ENCRYPTION_ALGORITHM))
             args.update(
                 {
@@ -148,7 +161,7 @@ class _AWS(object):
             )
             extra_args = (
                 {}
-                if self._encrypt is False
+                if self._encrypt is False or (self._encrypt and self._encryption_type == AWSEncryption.SSES3)
                 else self._get_extra_args(encryption_key=encryption_key)
             )
 
@@ -181,7 +194,7 @@ class _AWS(object):
         LOG.warning(":ignoring all prefixes")
         copy_source = {"Bucket": self._bucket, "Key": old_prefix}
         extra = self._get_extra_args(encryption_key)
-        if self._encrypt:
+        if self._encrypt and self._encryption_type != AWSEncryption.SSES3:
             extra.update(
                 dict(
                     CopySourceSSECustomerAlgorithm=self.config.ENCRYPTION_ALGORITHM,
@@ -195,12 +208,19 @@ class _AWS(object):
             self.delete_file(old_prefix, ignore_prefix=True)
 
     def get_object_size(self, path, encryption_key=None, ignore_prefix=False, prefix=None):
-        """Get object size"""
-        response = self.client.head_object(
-            Bucket=self._bucket,
-            Key=self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix),
-            **self._get_extra_args(encryption_key)
-        )
+        """Get object size of SSE-S3 or CSE-encrypted object
+        """
+        if self._encryption_type == AWSEncryption.SSES3:
+            response = self.client.head_object(
+                Bucket=self._bucket,
+                Key=self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
+            )
+        else:
+            response = self.client.head_object(
+                Bucket=self._bucket,
+                Key=self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix),
+                **self._get_extra_args(encryption_key)
+            )
         return response["ContentLength"]
 
     def check_if_key_exists(self, key, ignore_prefix=False, prefix=None):
@@ -277,3 +297,13 @@ class _AWS(object):
     def get_status(self, path):
         """Get status from tag data"""
         return self.client.get_object_tagging(Bucket=self._bucket, Key=path)
+
+    def encryption_type(self, encryption_type):
+        """
+        Set encryption type
+        :param encryption_type:
+        :return:
+        """
+        if not encryption_type in AWSEncryption.TYPES:
+            raise NotImplementedError("Encryption type {0} not supported".format(encryption_type))
+        self._encryption_type = encryption_type
