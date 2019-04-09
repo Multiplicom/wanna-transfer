@@ -27,17 +27,21 @@ class Config(object):
         get_boolean = partial(config.getboolean, section)
         
         self.ENCRYPTION_KEY = bytes(bytearray.fromhex(get("encryption_key", fallback="0000")))
-        self.PARTNER_NAME = get("partner", fallback="partner")
+        self.PARTNER_NAME = get("partner", fallback="")
         self.BUCKET = get("bucket", fallback="mtp-cloudstorage")
         self.UPLOAD_PREFIX = get("upload_prefix", fallback="in")
         self.IGNORE_PREFIX = get_boolean("ignore_prefix", fallback=False)
         self.VENDOR = DATACENTERS[self.PROVIDER](get)
 
     def validate(self, config):
+        if len(config.sections()) < 1:
+            raise ValueError("Invalid configuration file: Missing vendor settings.")
+
         vendors_with_settings = set(vendor.split(":")[0] for vendor in config.sections())
+        
         for vendor in vendors_with_settings:
             if vendor not in DATACENTERS.keys():
-                raise ValueError("Unsupported vendor '{}'".format(vendor))
+                raise ValueError("Invalid configuration file: Unsupported vendor '{}'".format(vendor))
 
 class AWS(object):
     """Aws specific settings"""

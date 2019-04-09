@@ -72,9 +72,10 @@ class _AWS(object):
         ignore_prefix=False,
         humanized=False,
         profile=None,
+        config=None
     ):
         LOG.info("Profile '{}'".format(profile) if profile else "No profile selected")
-        config = Config(profile=profile)
+        config = config if config else Config(profile=profile)
         self._bucket = config.BUCKET if not bucket else bucket
         self._default_prefix = os.path.join(config.UPLOAD_PREFIX, config.PARTNER_NAME)
         self._encrypt = use_encryption
@@ -122,7 +123,13 @@ class _AWS(object):
             key = path
         else:
             prefix = prefix or self._default_prefix or ""
-            key = os.path.join(prefix, os.path.basename(path))
+            
+            if os.path.dirname(path).startswith(prefix):
+                key = path
+            else:
+                key = os.path.join(prefix, os.path.basename(path))
+
+            LOG.info("Prefix={} & Path={} => Key={}".format(prefix, path, key))
         if md5 is True:
             key = key + self.hash_checksum
         return key
@@ -241,6 +248,7 @@ class _AWS(object):
             local = dst
         touch(local)
         key = self.get_obj_key(path, ignore_prefix=ignore_prefix, prefix=prefix)
+        LOG.warn("Downloading object with key **{}**".format(key))
 
         progress_callback = (
             ProgressPercentage(
