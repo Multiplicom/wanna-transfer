@@ -4,6 +4,7 @@ An efficient transfer to the cloud
 [![PyPI version](https://badge.fury.io/py/wanna-transfer.svg)](https://badge.fury.io/py/wanna-transfer)
 [![Maintainability](https://api.codeclimate.com/v1/badges/04b6db49155397d49c5d/maintainability)](https://codeclimate.com/github/piotrpawlaczek/wanna-transfer/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/04b6db49155397d49c5d/test_coverage)](https://codeclimate.com/github/piotrpawlaczek/wanna-transfer/test_coverage)
+[![GitHub Release](https://codebuild.eu-west-3.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiZkxDUlR2Y0NFT1lVUEtETWppVjZySnFuOXNqVHBuTFlxK1J2M2JPdit1WVVkcFVSUTh2UGpzNkV4RHRlTkE2TDNhQ1NLeFhpdEhYUm1WZEowWThtWW9rPSIsIml2UGFyYW1ldGVyU3BlYyI6IklXTnFpNjhYY0pvSlFnekgiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://github.com/Multiplicom/wanna-transfer/releases)
 
 The main goal of this tool is to provide efficient and reliable upload/download
 for large ( >5GB) files to and from the cloud.
