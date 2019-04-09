@@ -1,0 +1,19 @@
+version: 0.2
+
+env:
+  parameter-store:
+    PYPI_USERNAME: /pypi/username
+    PYPI_PASSWORD: /pypi/password
+
+phases:
+  install:
+    commands:
+      - pip install -U setuptools wheel twine
+
+  build:
+    commands:
+      - python setup.py sdist bdist_wheel
+      
+  post_build:
+    commands:
+      - python -m twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD --skip-existing dist/*
