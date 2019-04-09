@@ -32,7 +32,10 @@ class AWSEncryption:
     #More information: https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingEncryption.html
 
     #client-side encryption
-    CSE = 'cse'
+class ServerSideEncryption:
+    CUSTOMER_PROVIDED_KEY = 'SSEC'
+    S3_MANAGED_KEY = 'SSES3'
+    KMS_MANAGED_KEY = 'SSEKMS'
 
     #server-side encryption
     # AWS S3-managed
